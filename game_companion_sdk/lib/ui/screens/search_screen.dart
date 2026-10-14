@@ -13,7 +13,7 @@ class SearchScreen extends StatelessWidget {
 
     // Search POIs
     final matchedPois = GTAVFixtures.mapMarkers.where(
-      (poi) => poi.title.toLowerCase().contains(lowerQuery) || poi.description.toLowerCase().contains(lowerQuery)
+      (poi) => poi.name.toLowerCase().contains(lowerQuery) || poi.description.toLowerCase().contains(lowerQuery)
     ).toList();
 
     // Search Wiki Items
@@ -23,7 +23,7 @@ class SearchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Results for "$query"'),
+        title: Text('Search Results for "\$query"'),
       ),
       body: CustomScrollView(
         slivers: [
@@ -45,7 +45,7 @@ class SearchScreen extends StatelessWidget {
                   final poi = matchedPois[index];
                   return ListTile(
                     leading: const Icon(Icons.location_on),
-                    title: Text(poi.title),
+                    title: Text(poi.name),
                     subtitle: Text(poi.category),
                     onTap: () {
                       // Navigate to Map Tab centered on POI (For now, we'll just go back and pop)

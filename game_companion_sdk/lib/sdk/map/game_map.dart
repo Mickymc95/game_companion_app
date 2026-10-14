@@ -20,10 +20,10 @@ class GameMap extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        initialCenter: const LatLng(0, 0),
-        initialZoom: 1,
-        minZoom: 0,
-        maxZoom: 5,
+        initialCenter: const LatLng(-4096.0, 4096.0),
+        initialZoom: 2.2,
+        minZoom: 1.0,
+        maxZoom: 5.0,
         cameraConstraint: CameraConstraint.contain(bounds: bounds),
         crs: const CrsSimple(),
       ),
