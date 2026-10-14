@@ -29,7 +29,7 @@ void main() {
 
     // "Spaceship" should match a POI but not Wiki
     expect(find.text('Map Locations'), findsOneWidget);
-    expect(find.text('Spaceship Part 1'), findsOneWidget);
+    expect(find.text('Spaceship Part #1'), findsOneWidget);
     expect(find.text('Wiki Entries'), findsNothing);
   });
 }

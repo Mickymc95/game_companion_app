@@ -1,21 +1,37 @@
 class MapPointOfInterest {
   final String id;
-  final String title;
+  final String name;
   final String category;
-  final double x;
-  final double y;
+  final String subCategory;
+  final double gameX;
+  final double gameY;
   final String description;
-  final String icon;
+  final String? imageUrl;
   final bool isCollectable;
 
   MapPointOfInterest({
     required this.id,
-    required this.title,
+    required this.name,
     required this.category,
-    required this.x,
-    required this.y,
+    required this.subCategory,
+    required this.gameX,
+    required this.gameY,
     required this.description,
-    required this.icon,
+    this.imageUrl,
     this.isCollectable = false,
   });
+
+  factory MapPointOfInterest.fromJson(Map<String, dynamic> json) {
+    return MapPointOfInterest(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      subCategory: json['subCategory'] as String,
+      gameX: (json['gameX'] as num).toDouble(),
+      gameY: (json['gameY'] as num).toDouble(),
+      description: json['description'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      isCollectable: json['isCollectable'] as bool? ?? false,
+    );
+  }
 }

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "spaceship_part_01",
+    "name": "Spaceship Part #1",
+    "category": "collectibles",
+    "subCategory": "spaceship_parts",
+    "gameX": -1124.5,
+    "gameY": 4812.1,
+    "description": "Located on top of the Mount Chiliad observation platform.",
+    "imageUrl": null,
+    "isCollectable": true
+  },
+  {
+    "id": "stunt_jump_01",
+    "name": "Stunt Jump #1 - Del Perro Pier",
+    "category": "stunts",
+    "subCategory": "stunt_jumps",
+    "gameX": -1650.0,
+    "gameY": -1020.0,
+    "description": "Jump off the wooden ramp near the end of Del Perro Pier onto the beach below.",
+    "imageUrl": null,
+    "isCollectable": true
+  },
+  {
+    "id": "ammunation_pillbox",
+    "name": "Ammu-Nation Pillbox Hill",
+    "category": "services",
+    "subCategory": "ammunation",
+    "gameX": 243.5,
+    "gameY": -1089.2,
+    "description": "Includes an indoor shooting range to level up weapon skills.",
+    "imageUrl": null,
+    "isCollectable": false
+  }
+]
