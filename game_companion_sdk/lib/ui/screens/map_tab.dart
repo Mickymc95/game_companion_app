@@ -22,7 +22,8 @@ class MapTab extends ConsumerWidget {
     return Scaffold(
       body: poiAsyncValue.when(
         data: (pois) {
-          final filteredPois = pois.where((poi) => filterState.contains(poi.category)).toList();
+          final filteredPois =
+              pois.where((poi) => filterState.contains(poi.category)).toList();
           final markers = filteredPois.map((poi) {
             final isCollected = collectedState.contains(poi.id);
 
@@ -88,12 +89,15 @@ class MapTab extends ConsumerWidget {
           return Stack(
             children: [
               GameMap(
-                tileUrlTemplate: 'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
+                tileUrlTemplate:
+                    'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
                 fallbackAsset: GTAVFixtures.fallbackMapAsset,
                 markers: markers,
-                bounds: LatLngBounds.unsafe(
-                  const LatLng.unsafe(-8192.0, 0.0),
-                  const LatLng.unsafe(0.0, 8192.0),
+                bounds: LatLngBounds.fromPoints(
+                  [
+                    const LatLng(-8192.0, 0.0),
+                    const LatLng(0.0, 8192.0),
+                  ],
                 ),
               ),
               Positioned(
@@ -105,9 +109,151 @@ class MapTab extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      _buildFilterChip(ref, filterState, 'All', ['collectibles', 'stunts', 'services']),
+                      _buildFilterChip(
+                          ref, filterState, 'All', ['collectibles', 'stunts', 'services']),
                       const SizedBox(width: 8),
-                      _buildFilterChip(ref, filterState, 'Collectibles', ['collectibles']),
+                      _buildFilterChip(
+                          ref, filterState, 'Collectibles', ['collectibles']),
                       const SizedBox(width: 8),
                       _buildFilterChip(ref, filterState, 'Stunts', ['stunts']),
-                      const SizedBox(width:
+                      const SizedBox(width: 8),
+                      _buildFilterChip(ref, filterState, 'Services', ['services']),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.filter_list),
+        onPressed: () {
+          _showFilterSheet(context, ref);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      WidgetRef ref, Set<String> filterState, String label, List<String> categories) {
+    final isSelected = categories.every((cat) => filterState.contains(cat));
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (bool selected) {
+        final notifier = ref.read(mapFilterProvider.notifier);
+        if (label == 'All') {
+          if (selected) {
+            for (var cat in categories) {
+              if (!filterState.contains(cat)) notifier.toggleCategory(cat);
+            }
+          } else {
+            for (var cat in categories) {
+              if (filterState.contains(cat)) notifier.toggleCategory(cat);
+            }
+          }
+        } else {
+          notifier.toggleCategory(categories.first);
+        }
+      },
+    );
+  }
+
+  void _showFilterSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final filterState = ref.watch(mapFilterProvider);
+            final categories = ['collectibles', 'stunts', 'services'];
+
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Filter Map Categories',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    children: categories.map((cat) {
+                      return FilterChip(
+                        label: Text(cat),
+                        selected: filterState.contains(cat),
+                        onSelected: (bool value) {
+                          ref
+                              .read(mapFilterProvider.notifier)
+                              .toggleCategory(cat);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Apply'),
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showPoiDetails(BuildContext context, WidgetRef ref, MapPointOfInterest poi) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final isCollected =
+                ref.watch(collectionTrackerProvider).contains(poi.id);
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(poi.name,
+                      style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 4),
+                  Text('Coordinates: ${poi.gameX}, ${poi.gameY}',
+                      style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 8),
+                  Text(poi.description),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      icon: Icon(isCollected ? Icons.undo : Icons.check),
+                      label: Text(isCollected
+                          ? 'Mark as Uncollected'
+                          : 'Mark as Collected'),
+                      onPressed: () {
+                        ref
+                            .read(collectionTrackerProvider.notifier)
+                            .toggleCollection(poi.id);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
