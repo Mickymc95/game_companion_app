@@ -5,94 +5,133 @@ import 'package:latlong2/latlong.dart';
 import '../../sdk/map/game_map.dart';
 import '../../games/gtav/fixtures.dart';
 import '../../sdk/storage/collection_tracker.dart';
+import '../providers/map_providers.dart';
 
 class MapTab extends ConsumerWidget {
   const MapTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final poisAsync = ref.watch(mapPoiProvider);
+    final isRoadLayer = ref.watch(isRoadLayerProvider);
     final collectedState = ref.watch(collectionTrackerProvider);
-    // Simple filter state for demo purposes. In a real app, use Riverpod.
-    // We'll show all markers for now, but demonstrate the filter UI.
+    final activeFilters = ref.watch(mapFilterProvider);
+    final categories = ref.watch(mapCategoriesProvider);
 
-    final markers = GTAVFixtures.mapMarkers.map((poi) {
-      final isCollected = collectedState.contains(poi.id);
-      return Marker(
-        point: LatLng(poi.y, poi.x), // CRS.simple maps standard x/y to lat/lng
-        width: 40,
-        height: 40,
-        child: GestureDetector(
-          onTap: () {
-            _showPoiDetails(context, ref, poi);
-          },
-          child: Opacity(
-            opacity: isCollected ? 0.5 : 1.0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isCollected ? Icons.check : Icons.location_on,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-          ),
-        ),
-      );
-    }).toList();
+    // Initialize filters when categories are loaded
+    if (categories.isNotEmpty) {
+      Future.microtask(() => ref.read(mapFilterProvider.notifier).initializeCategories(categories));
+    }
+
+    final tileUrl = isRoadLayer
+        ? 'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png'
+        : 'https://gta5-map.github.io/tiles/satellite/{z}-{x}_{y}.png';
 
     return Scaffold(
-      body: GameMap(
-        tileUrlTemplate: GTAVFixtures.mapTileUrl,
-        fallbackAsset: GTAVFixtures.fallbackMapAsset,
-        markers: markers,
-        bounds: LatLngBounds(const LatLng(-100, -100), const LatLng(100, 100)), // Dummy bounds for CRS.simple
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.filter_list),
-        onPressed: () {
-          _showFilterSheet(context);
+      body: poisAsync.when(
+        data: (pois) {
+          final filteredPois = pois.where((poi) => activeFilters.contains(poi.category)).toList();
+
+          final markers = filteredPois.map((poi) {
+            final isCollected = collectedState.contains(poi.id);
+            return Marker(
+              point: LatLng(poi.y, poi.x), // CRS.simple maps standard x/y to lat/lng
+              width: 40,
+              height: 40,
+              child: GestureDetector(
+                onTap: () {
+                  _showPoiDetails(context, ref, poi);
+                },
+                child: Opacity(
+                  opacity: isCollected ? 0.5 : 1.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isCollected ? Icons.check : Icons.location_on,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList();
+
+          return GameMap(
+            tileUrlTemplate: tileUrl,
+            fallbackAsset: GTAVFixtures.fallbackMapAsset,
+            markers: markers,
+            bounds: LatLngBounds(const LatLng(-100, -100), const LatLng(100, 100)), // Dummy bounds for CRS.simple
+          );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error loading map data: $err')),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'map_layer_toggle',
+            child: Icon(isRoadLayer ? Icons.satellite : Icons.map),
+            onPressed: () {
+              ref.read(isRoadLayerProvider.notifier).state = !isRoadLayer;
+            },
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'map_filter_toggle',
+            child: const Icon(Icons.filter_list),
+            onPressed: () {
+              _showFilterSheet(context, ref);
+            },
+          ),
+        ],
       ),
     );
   }
 
-  void _showFilterSheet(BuildContext context) {
+  void _showFilterSheet(BuildContext context, WidgetRef parentRef) {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
-        final categories = GTAVFixtures.mapMarkers.map((m) => m.category).toSet().toList();
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Filter Map Categories', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: categories.map((cat) {
-                  return FilterChip(
-                    label: Text(cat),
-                    selected: true, // Demo: all selected
-                    onSelected: (bool value) {
-                      // Handle filter logic via Riverpod provider in real implementation
-                    },
-                  );
-                }).toList(),
+        return Consumer(
+          builder: (context, ref, child) {
+            final categories = ref.watch(mapCategoriesProvider);
+            final activeFilters = ref.watch(mapFilterProvider);
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Filter Map Categories', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    children: categories.map((cat) {
+                      return FilterChip(
+                        label: Text(cat),
+                        selected: activeFilters.contains(cat),
+                        onSelected: (bool value) {
+                          ref.read(mapFilterProvider.notifier).toggleCategory(cat);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Apply'),
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Apply'),
-                ),
-              )
-            ],
-          ),
+            );
+          }
         );
       }
     );

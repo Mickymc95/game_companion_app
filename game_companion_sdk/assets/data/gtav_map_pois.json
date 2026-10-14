@@ -1,0 +1,52 @@
+[
+  {
+    "id": "spaceship_1",
+    "title": "Spaceship Part 1",
+    "category": "Spaceship Parts",
+    "x": 64.0,
+    "y": 64.0,
+    "description": "Found near the old barn.",
+    "icon": "spaceship",
+    "isCollectable": true
+  },
+  {
+    "id": "spaceship_2",
+    "title": "Spaceship Part 2",
+    "category": "Spaceship Parts",
+    "x": 48.0,
+    "y": 32.0,
+    "description": "Hidden in the alley.",
+    "icon": "spaceship",
+    "isCollectable": true
+  },
+  {
+    "id": "stunt_jump_1",
+    "title": "Stunt Jump 1",
+    "category": "Stunt Jumps",
+    "x": 80.0,
+    "y": 80.0,
+    "description": "Jump over the highway.",
+    "icon": "jump",
+    "isCollectable": true
+  },
+  {
+    "id": "letter_scrap_1",
+    "title": "Letter Scrap 1",
+    "category": "Letter Scraps",
+    "x": 30.0,
+    "y": 50.0,
+    "description": "On top of Mt. Chiliad.",
+    "icon": "letter",
+    "isCollectable": true
+  },
+  {
+    "id": "ammunation_1",
+    "title": "Ammu-Nation",
+    "category": "Stores",
+    "x": 55.0,
+    "y": 45.0,
+    "description": "Buy weapons and armor.",
+    "icon": "weapon",
+    "isCollectable": false
+  }
+]
