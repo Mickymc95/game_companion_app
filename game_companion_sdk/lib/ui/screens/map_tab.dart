@@ -93,12 +93,6 @@ class MapTab extends ConsumerWidget {
                     'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
                 fallbackAsset: GTAVFixtures.fallbackMapAsset,
                 markers: markers,
-                bounds: LatLngBounds.fromPoints(
-                  [
-                    const LatLng(-8192.0, 0.0),
-                    const LatLng(0.0, 8192.0),
-                  ],
-                ),
               ),
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
