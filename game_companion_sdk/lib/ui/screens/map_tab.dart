@@ -3,39 +3,48 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../sdk/map/game_map.dart';
+import '../../sdk/map/coords_helper.dart';
+import '../../sdk/map/poi_provider.dart';
 import '../../games/gtav/fixtures.dart';
 import '../../sdk/storage/collection_tracker.dart';
-import '../providers/map_providers.dart';
+import '../providers/map_filter_provider.dart';
+import '../../sdk/models/map_poi.dart';
 
 class MapTab extends ConsumerWidget {
   const MapTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final poisAsync = ref.watch(mapPoiProvider);
-    final isRoadLayer = ref.watch(isRoadLayerProvider);
     final collectedState = ref.watch(collectionTrackerProvider);
-    final activeFilters = ref.watch(mapFilterProvider);
-    final categories = ref.watch(mapCategoriesProvider);
-
-    // Initialize filters when categories are loaded
-    if (categories.isNotEmpty) {
-      Future.microtask(() => ref.read(mapFilterProvider.notifier).initializeCategories(categories));
-    }
-
-    final tileUrl = isRoadLayer
-        ? 'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png'
-        : 'https://gta5-map.github.io/tiles/satellite/{z}-{x}_{y}.png';
+    final filterState = ref.watch(mapFilterProvider);
+    final poiAsyncValue = ref.watch(poiProvider);
 
     return Scaffold(
-      body: poisAsync.when(
+      body: poiAsyncValue.when(
         data: (pois) {
-          final filteredPois = pois.where((poi) => activeFilters.contains(poi.category)).toList();
-
+          final filteredPois = pois.where((poi) => filterState.contains(poi.category)).toList();
           final markers = filteredPois.map((poi) {
             final isCollected = collectedState.contains(poi.id);
+
+            Color iconColor;
+            IconData iconData;
+
+            if (poi.category == 'collectibles') {
+              iconColor = Colors.greenAccent;
+              iconData = Icons.rocket_launch;
+            } else if (poi.category == 'stunts') {
+              iconColor = Colors.deepOrange;
+              iconData = Icons.sports_motorsports;
+            } else if (poi.category == 'services') {
+              iconColor = Colors.redAccent;
+              iconData = Icons.shield;
+            } else {
+              iconColor = Colors.blueAccent;
+              iconData = Icons.location_on;
+            }
+
             return Marker(
-              point: LatLng(poi.y, poi.x), // CRS.simple maps standard x/y to lat/lng
+              point: inGameToMapCoords(poi.gameX, poi.gameY),
               width: 40,
               height: 40,
               child: GestureDetector(
@@ -43,135 +52,62 @@ class MapTab extends ConsumerWidget {
                   _showPoiDetails(context, ref, poi);
                 },
                 child: Opacity(
-                  opacity: isCollected ? 0.5 : 1.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isCollected ? Icons.check : Icons.location_on,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
+                  opacity: isCollected ? 0.4 : 1.0,
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: iconColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          iconData,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (isCollected)
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
             );
           }).toList();
 
-          return GameMap(
-            tileUrlTemplate: tileUrl,
-            fallbackAsset: GTAVFixtures.fallbackMapAsset,
-            markers: markers,
-            bounds: LatLngBounds(const LatLng(-100, -100), const LatLng(100, 100)), // Dummy bounds for CRS.simple
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error loading map data: $err')),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'map_layer_toggle',
-            child: Icon(isRoadLayer ? Icons.satellite : Icons.map),
-            onPressed: () {
-              ref.read(isRoadLayerProvider.notifier).state = !isRoadLayer;
-            },
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            heroTag: 'map_filter_toggle',
-            child: const Icon(Icons.filter_list),
-            onPressed: () {
-              _showFilterSheet(context, ref);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showFilterSheet(BuildContext context, WidgetRef parentRef) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) {
-        return Consumer(
-          builder: (context, ref, child) {
-            final categories = ref.watch(mapCategoriesProvider);
-            final activeFilters = ref.watch(mapFilterProvider);
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Filter Map Categories', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    children: categories.map((cat) {
-                      return FilterChip(
-                        label: Text(cat),
-                        selected: activeFilters.contains(cat),
-                        onSelected: (bool value) {
-                          ref.read(mapFilterProvider.notifier).toggleCategory(cat);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Apply'),
-                    ),
-                  )
-                ],
+          return Stack(
+            children: [
+              GameMap(
+                tileUrlTemplate: 'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
+                fallbackAsset: GTAVFixtures.fallbackMapAsset,
+                markers: markers,
+                bounds: LatLngBounds.unsafe(
+                  const LatLng.unsafe(-8192.0, 0.0),
+                  const LatLng.unsafe(0.0, 8192.0),
+                ),
               ),
-            );
-          }
-        );
-      }
-    );
-  }
-
-  void _showPoiDetails(BuildContext context, WidgetRef ref, dynamic poi) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) {
-        return Consumer(
-          builder: (context, ref, child) {
-            final isCollected = ref.watch(collectionTrackerProvider).contains(poi.id);
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(poi.title, style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: 8),
-                  Text(poi.description),
-                  const SizedBox(height: 24),
-                  if (poi.isCollectable)
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        icon: Icon(isCollected ? Icons.undo : Icons.check),
-                        label: Text(isCollected ? 'Mark as Uncollected' : 'Mark as Collected'),
-                        onPressed: () {
-                          ref.read(collectionTrackerProvider.notifier).toggleCollection(poi.id);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                    )
-                ],
-              ),
-            );
-          }
-        );
-      },
-    );
-  }
-}
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 0,
+                right: 0,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      _buildFilterChip(ref, filterState, 'All', ['collectibles', 'stunts', 'services']),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(ref, filterState, 'Collectibles', ['collectibles']),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(ref, filterState, 'Stunts', ['stunts']),
+                      const SizedBox(width:
