@@ -1,0 +1,14 @@
+[
+  {
+    "item_id": "pistol",
+    "name": "Pistol",
+    "originalImageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png",
+    "imageUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/pistol.webp"
+  },
+  {
+    "item_id": "assault_rifle",
+    "name": "Assault Rifle",
+    "originalImageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+    "imageUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/assault_rifle.webp"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "item_id": "adder",
+    "name": "Adder",
+    "originalImageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+    "imageUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/adder.webp"
+  },
+  {
+    "item_id": "zentorno",
+    "name": "Zentorno",
+    "originalImageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png",
+    "imageUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/zentorno.webp"
+  }
+]
