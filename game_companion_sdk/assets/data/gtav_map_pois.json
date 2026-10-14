@@ -1,18 +1,29 @@
 [
   {
-    "id": "spaceship_part_01",
-    "name": "Spaceship Part #1",
+    "id": "spaceship_1",
+    "name": "Spaceship Part 1",
     "category": "collectibles",
     "subCategory": "spaceship_parts",
     "gameX": -1124.5,
     "gameY": 4812.1,
-    "description": "Located on top of the Mount Chiliad observation platform.",
+    "description": "Found near the old barn.",
     "imageUrl": null,
     "isCollectable": true
   },
   {
-    "id": "stunt_jump_01",
-    "name": "Stunt Jump #1 - Del Perro Pier",
+    "id": "spaceship_2",
+    "name": "Spaceship Part 2",
+    "category": "collectibles",
+    "subCategory": "spaceship_parts",
+    "gameX": -500.0,
+    "gameY": 1200.0,
+    "description": "Hidden in the alley.",
+    "imageUrl": null,
+    "isCollectable": true
+  },
+  {
+    "id": "stunt_jump_1",
+    "name": "Stunt Jump 1",
     "category": "stunts",
     "subCategory": "stunt_jumps",
     "gameX": -1650.0,
@@ -22,14 +33,36 @@
     "isCollectable": true
   },
   {
-    "id": "ammunation_pillbox",
-    "name": "Ammu-Nation Pillbox Hill",
+    "id": "letter_scrap_1",
+    "name": "Letter Scrap 1",
+    "category": "collectibles",
+    "subCategory": "letter_scraps",
+    "gameX": 450.0,
+    "gameY": 5600.0,
+    "description": "On top of Mt. Chiliad.",
+    "imageUrl": null,
+    "isCollectable": true
+  },
+  {
+    "id": "ammunation_1",
+    "name": "Ammu-Nation",
     "category": "services",
     "subCategory": "ammunation",
     "gameX": 243.5,
     "gameY": -1089.2,
-    "description": "Includes an indoor shooting range to level up weapon skills.",
+    "description": "Buy weapons and armor. Includes an indoor shooting range.",
     "imageUrl": null,
     "isCollectable": false
+  },
+  {
+    "id": "spaceship_part_01",
+    "name": "Spaceship Part #1 (Observation)",
+    "category": "collectibles",
+    "subCategory": "spaceship_parts",
+    "gameX": -1124.5,
+    "gameY": 4812.1,
+    "description": "Located on top of the Mount Chiliad observation platform.",
+    "imageUrl": null,
+    "isCollectable": true
   }
 ]

@@ -20,7 +20,7 @@ class GameMap extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        initialCenter: const LatLng(-4096.0, 4096.0),
+        initialCenter: const LatLng.unsafe(-4096.0, 4096.0),
         initialZoom: 2.2,
         minZoom: 1.0,
         maxZoom: 5.0,
@@ -33,7 +33,7 @@ class GameMap extends StatelessWidget {
           fallbackUrl: tileUrlTemplate,
           errorImage: AssetImage(fallbackAsset),
           errorTileCallback: (tile, error, stackTrace) {
-              // Log or handle error if needed
+            // Log or handle error if needed
           },
         ),
         MarkerLayer(markers: markers),
