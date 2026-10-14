@@ -5,17 +5,38 @@ import '../../sdk/registry/game_registry.dart';
 import '../../sdk/models/game_manifest.dart';
 import '../widgets/game_switcher_drawer.dart';
 import '../widgets/global_search_bar.dart';
+import '../providers/scroll_providers.dart';
 
 class ShellScreen extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const ShellScreen({super.key, required this.navigationShell});
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(BuildContext context, WidgetRef ref, int index) {
+    final bool isAlreadyActive = index == navigationShell.currentIndex;
+
     navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: isAlreadyActive,
     );
+
+    // If it's already active, and it is NOT the map tab (index 0), scroll to top.
+    if (isAlreadyActive && index != 0) {
+      ScrollController? controller;
+      if (index == 1) { // Wiki
+        controller = ref.read(wikiScrollControllerProvider);
+      } else if (index == 2) { // Guides
+        controller = ref.read(guidesScrollControllerProvider);
+      }
+
+      if (controller != null && controller.hasClients) {
+        controller.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 
   @override
@@ -58,7 +79,7 @@ class ShellScreen extends ConsumerWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onItemTapped,
+        onDestinationSelected: (index) => _onItemTapped(context, ref, index),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.map),
