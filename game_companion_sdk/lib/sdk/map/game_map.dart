@@ -20,7 +20,7 @@ class GameMap extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        initialCenter: const LatLng(-4096.0, 4096.0),
+        initialCenter: const LatLng(-4096.0, 4096.0), // fallback geographic
         initialZoom: 2.2,
         minZoom: 1.0,
         maxZoom: 5.0,
@@ -28,6 +28,14 @@ class GameMap extends StatelessWidget {
         crs: const CrsSimple(),
       ),
       children: [
+        OverlayImageLayer(
+          overlayImages: [
+            OverlayImage(
+              bounds: bounds,
+              imageProvider: AssetImage(fallbackAsset),
+            )
+          ]
+        ),
         TileLayer(
           urlTemplate: tileUrlTemplate,
           fallbackUrl: tileUrlTemplate,
