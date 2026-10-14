@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../games/gtav/fixtures.dart';
+import '../providers/scroll_providers.dart';
 
-class GuidesTab extends StatelessWidget {
+class GuidesTab extends ConsumerWidget {
   const GuidesTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final guides = GTAVFixtures.guides;
 
     return ListView.builder(
+      controller: ref.watch(guidesScrollControllerProvider),
       itemCount: guides.length,
       itemBuilder: (context, index) {
         final guide = guides[index];

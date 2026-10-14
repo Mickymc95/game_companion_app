@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../games/gtav/fixtures.dart';
 import '../../sdk/models/wiki_item.dart';
+import '../providers/scroll_providers.dart';
 
-class WikiTab extends StatefulWidget {
+class WikiTab extends ConsumerStatefulWidget {
   const WikiTab({super.key});
 
   @override
-  State<WikiTab> createState() => _WikiTabState();
+  ConsumerState<WikiTab> createState() => _WikiTabState();
 }
 
-class _WikiTabState extends State<WikiTab> {
+class _WikiTabState extends ConsumerState<WikiTab> {
   String? _selectedCategory;
 
   @override
@@ -56,6 +59,7 @@ class _WikiTabState extends State<WikiTab> {
         ),
         Expanded(
           child: ListView.builder(
+            controller: ref.watch(wikiScrollControllerProvider),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
@@ -69,12 +73,7 @@ class _WikiTabState extends State<WikiTab> {
                   subtitle: Text(item.category),
                   onTap: () {
                     // Open detailed view with stats
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WikiDetailScreen(item: item),
-                      ),
-                    );
+                    context.go('/wiki/detail', extra: item);
                   },
                 ),
               );

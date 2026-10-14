@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../games/gtav/fixtures.dart';
-import 'wiki_tab.dart'; // For WikiDetailScreen
 
 class SearchScreen extends StatelessWidget {
   final String query;
@@ -74,12 +74,7 @@ class SearchScreen extends StatelessWidget {
                     title: Text(item.title),
                     subtitle: Text(item.category),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WikiDetailScreen(item: item),
-                        ),
-                      );
+                      context.push('/wiki/detail', extra: item);
                     },
                   );
                 },

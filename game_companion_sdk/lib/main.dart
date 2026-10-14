@@ -9,6 +9,7 @@ import 'ui/screens/guides_tab.dart';
 import 'ui/screens/search_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sdk/storage/collection_tracker.dart';
+import 'sdk/models/wiki_item.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,10 @@ void main() async {
 final _router = GoRouter(
   initialLocation: '/map',
   routes: [
+    GoRoute(
+      path: '/',
+      redirect: (context, state) => '/map',
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ShellScreen(navigationShell: navigationShell);
@@ -45,6 +50,19 @@ final _router = GoRouter(
             GoRoute(
               path: '/wiki',
               builder: (context, state) => const WikiTab(),
+              routes: [
+                GoRoute(
+                  path: 'detail',
+                  builder: (context, state) {
+                    final item = state.extra as WikiItem?;
+                    if (item == null) {
+                      // Fallback for web refresh without extra state
+                      return const Scaffold(body: Center(child: Text('Item not found')));
+                    }
+                    return WikiDetailScreen(item: item);
+                  },
+                ),
+              ],
             ),
           ],
         ),
