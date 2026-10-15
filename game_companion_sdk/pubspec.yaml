@@ -33,3 +33,5 @@ flutter:
   assets:
     - assets/maps/
     - assets/data/
+    - assets/media/gtav/vehicles/
+    - assets/media/gtav/weapons/

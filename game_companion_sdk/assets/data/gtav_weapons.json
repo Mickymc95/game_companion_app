@@ -5,12 +5,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.26,
-      "Fire Rate": 0.40,
-      "Accuracy": 0.40,
+      "Fire Rate": 0.4,
+      "Accuracy": 0.4,
       "Range": 0.25
     },
     "description": "Modeled after the Taurus PT92 and Beretta 92FS, this standard-issue semi-automatic sidearm is ubiquitous across Los Santos law enforcement and street crews.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/pistol.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/pistol.webp"
   },
   {
     "id": "w_combat_pistol",
@@ -19,11 +19,11 @@
     "stats": {
       "Damage": 0.28,
       "Fire Rate": 0.45,
-      "Accuracy": 0.50,
-      "Range": 0.30
+      "Accuracy": 0.5,
+      "Range": 0.3
     },
     "description": "Based on the Heckler & Koch P2000, offering improved stopping power, higher magazine capacity, and crisp semi-automatic recoil control.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/combat_pistol.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/combat_pistol.webp"
   },
   {
     "id": "w_ap_pistol",
@@ -31,12 +31,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.25,
-      "Fire Rate": 0.80,
+      "Fire Rate": 0.8,
       "Accuracy": 0.42,
-      "Range": 0.30
+      "Range": 0.3
     },
     "description": "An armor-piercing machine pistol inspired by the Colt SCAMP and OTs-33 Pernach, regarded as the premier drive-by sidearm due to its blistering automatic fire rate.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/ap_pistol.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/ap_pistol.webp"
   },
   {
     "id": "w_heavy_revolver",
@@ -44,12 +44,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.75,
-      "Fire Rate": 0.20,
+      "Fire Rate": 0.2,
       "Accuracy": 0.65,
       "Range": 0.45
     },
     "description": "A high-caliber six-shooter inspired by the Taurus Raging Bull, delivering devastating one-shot body damage at the expense of heavy cylinder cycle times.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/heavy_revolver.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/heavy_revolver.webp"
   },
   {
     "id": "w_micro_smg",
@@ -62,7 +62,7 @@
       "Range": 0.25
     },
     "description": "Based on the iconic Mini Uzi, this compact submachine gun can be fired from within vehicles during high-speed chases and urban shootouts.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/micro_smg.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/micro_smg.webp"
   },
   {
     "id": "w_smg",
@@ -70,12 +70,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.25,
-      "Fire Rate": 0.60,
-      "Accuracy": 0.50,
+      "Fire Rate": 0.6,
+      "Accuracy": 0.5,
       "Range": 0.35
     },
     "description": "The quintessential MP5 submachine gun with a collapsible stock, providing low muzzle climb and dependable intermediate-range automatic fire.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/smg.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/smg.webp"
   },
   {
     "id": "w_combat_pdw",
@@ -88,7 +88,7 @@
       "Range": 0.38
     },
     "description": "Modeled after the SIG Sauer MPX, featuring an integrated suppressor shroud that muffles gunshots and prevents radar pings during stealth infiltration.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/combat_pdw.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/combat_pdw.webp"
   },
   {
     "id": "w_pump_shotgun",
@@ -96,12 +96,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.67,
-      "Fire Rate": 0.20,
-      "Accuracy": 0.30,
-      "Range": 0.20
+      "Fire Rate": 0.2,
+      "Accuracy": 0.3,
+      "Range": 0.2
     },
     "description": "A 12-gauge Mossberg 590 pump-action shotgun found in every police cruiser, delivering lethal buckshot spreads at close-quarters room-clearing distances.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/pump_shotgun.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/pump_shotgun.webp"
   },
   {
     "id": "w_sawed_off_shotgun",
@@ -110,11 +110,11 @@
     "stats": {
       "Damage": 0.72,
       "Fire Rate": 0.25,
-      "Accuracy": 0.20,
+      "Accuracy": 0.2,
       "Range": 0.15
     },
     "description": "A modified double-barrel break-action shotgun with shortened barrels, compact enough to be drawn and fired from motorcycles and bicycles.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/sawed_off_shotgun.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/sawed_off_shotgun.webp"
   },
   {
     "id": "w_assault_shotgun",
@@ -122,12 +122,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.65,
-      "Fire Rate": 0.50,
+      "Fire Rate": 0.5,
       "Accuracy": 0.35,
       "Range": 0.25
     },
     "description": "Inspired by the UTAS UTS-15, this drum-fed fully-automatic combat shotgun dismantles vehicle armor and clears fortified corridors in seconds.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/assault_shotgun.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/assault_shotgun.webp"
   },
   {
     "id": "w_carbine_rifle",
@@ -140,7 +140,7 @@
       "Range": 0.45
     },
     "description": "Modeled after the ubiquitous Colt M4A1, the Carbine Rifle serves as the all-around benchmark for combat accuracy, handling, and tactical customization.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/carbine_rifle.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/carbine_rifle.webp"
   },
   {
     "id": "w_assault_rifle",
@@ -148,12 +148,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.34,
-      "Fire Rate": 0.60,
-      "Accuracy": 0.50,
+      "Fire Rate": 0.6,
+      "Accuracy": 0.5,
       "Range": 0.45
     },
     "description": "A rugged Kalashnikov AK-47 variant featuring stamping and wood furniture that delivers heavier per-bullet damage across medium combat ranges.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/assault_rifle.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/assault_rifle.webp"
   },
   {
     "id": "w_special_carbine",
@@ -166,7 +166,7 @@
       "Range": 0.48
     },
     "description": "Based on the Heckler & Koch G36C, combining a lightweight polymer composite frame with superior muzzle velocity and recoil stabilization.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/special_carbine.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/special_carbine.webp"
   },
   {
     "id": "w_advanced_rifle",
@@ -174,12 +174,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.34,
-      "Fire Rate": 0.70,
+      "Fire Rate": 0.7,
       "Accuracy": 0.52,
       "Range": 0.45
     },
     "description": "A bullpup assault rifle based on the IWI Tavor CTAR-21, delivering rapid cyclic fire with compact maneuverability in confined corridors.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/advanced_rifle.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/advanced_rifle.webp"
   },
   {
     "id": "w_sniper_rifle",
@@ -187,12 +187,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.85,
-      "Fire Rate": 0.20,
+      "Fire Rate": 0.2,
       "Accuracy": 0.85,
       "Range": 0.85
     },
     "description": "An AWM-style bolt-action precision marksman rifle equipped with high-magnification telescopic glass for long-range tactical target neutralization.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/sniper_rifle.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/sniper_rifle.webp"
   },
   {
     "id": "w_heavy_sniper",
@@ -201,11 +201,11 @@
     "stats": {
       "Damage": 0.98,
       "Fire Rate": 0.22,
-      "Accuracy": 0.90,
+      "Accuracy": 0.9,
       "Range": 0.98
     },
     "description": "A devastating .50 BMG anti-materiel rifle based on the Barrett M82, capable of piercing engine blocks and taking down tail rotors in a single trigger pull.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/heavy_sniper.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/heavy_sniper.webp"
   },
   {
     "id": "w_marksman_rifle",
@@ -214,24 +214,24 @@
     "stats": {
       "Damage": 0.65,
       "Fire Rate": 0.45,
-      "Accuracy": 0.80,
+      "Accuracy": 0.8,
       "Range": 0.75
     },
     "description": "A designated marksman rifle modeled after the M14 EBR, providing rapid semi-automatic follow-up shots through an illuminated sniper optic.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/marksman_rifle.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/marksman_rifle.webp"
   },
   {
     "id": "w_rpg",
     "title": "RPG (Rocket Launcher)",
     "category": "Weapons",
     "stats": {
-      "Damage": 1.00,
+      "Damage": 1.0,
       "Fire Rate": 0.15,
-      "Accuracy": 0.40,
+      "Accuracy": 0.4,
       "Range": 0.65
     },
     "description": "The classic RPG-7 shoulder-fired rocket launcher, launching high-explosive anti-tank warheads that annihilate grouped infantry and light armored vehicles.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/rpg.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/rpg.webp"
   },
   {
     "id": "w_minigun",
@@ -239,12 +239,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.38,
-      "Fire Rate": 1.00,
+      "Fire Rate": 1.0,
       "Accuracy": 0.45,
-      "Range": 0.60
+      "Range": 0.6
     },
     "description": "A multi-barrel Gatling rotary heavy machine gun based on the M134, firing thousands of rounds per minute capable of tearing armored convoys to shreds.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/minigun.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/minigun.webp"
   },
   {
     "id": "w_sticky_bomb",
@@ -252,12 +252,12 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.95,
-      "Fire Rate": 0.30,
-      "Accuracy": 0.40,
+      "Fire Rate": 0.3,
+      "Accuracy": 0.4,
       "Range": 0.35
     },
     "description": "Plastic explosive charges fitted with high-power adhesive backing and a remote radio frequency detonator, perfect for ambush traps and security van doors.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/sticky_bomb.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/sticky_bomb.webp"
   },
   {
     "id": "w_combat_knife",
@@ -265,11 +265,11 @@
     "category": "Weapons",
     "stats": {
       "Damage": 0.25,
-      "Fire Rate": 0.50,
-      "Accuracy": 0.10,
+      "Fire Rate": 0.5,
+      "Accuracy": 0.1,
       "Range": 0.05
     },
     "description": "A 7-inch carbon steel fixed-blade tactical knife with serrated spine, tailored for silent takedowns and close-quarters hand-to-hand combat.",
-    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/weapons/combat_knife.webp"
+    "thumbnailUrl": "assets/media/gtav/weapons/combat_knife.webp"
   }
 ]
