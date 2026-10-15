@@ -57,6 +57,15 @@ class GameMap extends StatelessWidget {
         crs: const CrsSimple(),
       ),
       children: [
+        if (bounds != null)
+          OverlayImageLayer(
+            overlayImages: [
+              OverlayImage(
+                bounds: bounds!,
+                imageProvider: AssetImage(fallbackAsset),
+              )
+            ]
+          ),
         TileLayer(
           urlTemplate: tileUrlTemplate,
           maxNativeZoom: maxNativeZoom,

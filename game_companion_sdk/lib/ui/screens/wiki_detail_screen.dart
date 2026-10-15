@@ -25,7 +25,6 @@ class WikiDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final meta = getWikiItemMetadata(item);
-
     // Attempt to find a matching POI
     final mapPoisAsync = ref.watch(mapPoiProvider);
     final allPois = mapPoisAsync.valueOrNull ?? [];

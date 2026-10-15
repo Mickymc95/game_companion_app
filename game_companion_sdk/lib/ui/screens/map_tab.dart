@@ -22,6 +22,7 @@ class MapTab extends ConsumerStatefulWidget {
 class _MapTabState extends ConsumerState<MapTab> {
   final MapController _mapController = MapController();
 
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +37,8 @@ class _MapTabState extends ConsumerState<MapTab> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
+
+        ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
       if (next != null) {
         _mapController.move(next.position, next.zoom);
 
@@ -480,7 +482,6 @@ class _MapTabState extends ConsumerState<MapTab> {
                       },
                     ),
                   ),
-
                   // Route Sequencer: Find Next Closest Uncollected POI
                   if (poi.isCollectable) ...[
                     const SizedBox(height: 8),
@@ -534,7 +535,6 @@ class _MapTabState extends ConsumerState<MapTab> {
                       ),
                     ),
                   ],
-
                   if (matchingWiki != null) ...[
                     const SizedBox(height: 8),
                     SizedBox(
