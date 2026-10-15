@@ -6,14 +6,14 @@ class GameMap extends StatelessWidget {
   final String tileUrlTemplate;
   final String fallbackAsset;
   final List<Marker> markers;
-  final LatLngBounds bounds;
+  final LatLngBounds? bounds;
 
   const GameMap({
     super.key,
     required this.tileUrlTemplate,
     required this.fallbackAsset,
     required this.markers,
-    required this.bounds,
+    this.bounds,
   });
 
   @override
@@ -24,7 +24,9 @@ class GameMap extends StatelessWidget {
         initialZoom: 2.2,
         minZoom: 1.0,
         maxZoom: 5.0,
-        cameraConstraint: CameraConstraint.contain(bounds: bounds),
+        cameraConstraint: bounds != null
+            ? CameraConstraint.contain(bounds: bounds!)
+            : const CameraConstraint.unconstrained(),
         crs: const CrsSimple(),
       ),
       children: [
@@ -32,9 +34,7 @@ class GameMap extends StatelessWidget {
           urlTemplate: tileUrlTemplate,
           fallbackUrl: tileUrlTemplate,
           errorImage: AssetImage(fallbackAsset),
-          errorTileCallback: (tile, error, stackTrace) {
-            // Log or handle error if needed
-          },
+          errorTileCallback: (tile, error, stackTrace) {},
         ),
         MarkerLayer(markers: markers),
       ],
