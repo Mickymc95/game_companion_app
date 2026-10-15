@@ -7,6 +7,8 @@ import '../../sdk/models/map_poi.dart';
 import '../../sdk/models/wiki_item.dart';
 import '../../sdk/map/coords_helper.dart';
 import '../../sdk/map/target_map_position_provider.dart';
+import '../utils/wiki_icon_helper.dart';
+import '../widgets/wiki_item_thumbnail.dart';
 
 class SearchScreen extends ConsumerWidget {
   final String query;
@@ -79,13 +81,42 @@ class SearchScreen extends ConsumerWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final item = wikiResults[index];
+                      final wikiItem = item.payload is WikiItem ? item.payload as WikiItem : null;
                       return ListTile(
-                        leading: const Icon(Icons.library_books),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: wikiItem != null
+                            ? WikiItemThumbnail(item: wikiItem)
+                            : const Icon(Icons.library_books),
                         title: Text(item.title),
-                        subtitle: Text(item.subtitle),
+                        subtitle: wikiItem != null
+                            ? Builder(
+                                builder: (context) {
+                                  final meta = getWikiItemMetadata(wikiItem);
+                                  return Row(
+                                    children: [
+                                      Text(
+                                        item.subtitle,
+                                        style: TextStyle(
+                                          color: meta.accentColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      if (meta.subType.isNotEmpty && meta.subType != item.subtitle) ...[
+                                        Text(
+                                          ' • ${meta.subType}',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12),
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
+                              )
+                            : Text(item.subtitle),
                         onTap: () {
-                          final wikiItem = item.payload as WikiItem;
-                          context.push('/wiki/detail', extra: wikiItem);
+                          if (wikiItem != null) {
+                            context.push('/wiki/detail', extra: wikiItem);
+                          }
                         },
                       );
                     },

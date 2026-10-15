@@ -8,6 +8,7 @@ import 'package:game_companion_sdk/ui/providers/map_providers.dart';
 import 'package:game_companion_sdk/sdk/models/map_poi.dart';
 import 'package:game_companion_sdk/ui/screens/search_screen.dart';
 import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
+import 'package:game_companion_sdk/ui/widgets/wiki_item_thumbnail.dart';
 
 void main() {
   testWidgets('SearchScreen renders empty query correctly in AppBar', (WidgetTester tester) async {
@@ -223,5 +224,46 @@ void main() {
 
     // Ensure we navigated to wiki detail
     expect(find.text('A standard pistol.'), findsOneWidget);
+  });
+
+  testWidgets('SearchScreen renders WikiItemThumbnail and specific category icon for wiki results', (WidgetTester tester) async {
+    final mockWikiItems = [
+      WikiItem(
+        id: 'w_carbine_rifle',
+        title: 'Carbine Rifle',
+        category: 'Weapons',
+        stats: {},
+        description: 'A standard assault rifle.',
+        thumbnailUrl: '',
+      ),
+      WikiItem(
+        id: 'v_adder',
+        title: 'Adder',
+        category: 'Vehicles',
+        stats: {},
+        description: 'High-speed supercar.',
+        thumbnailUrl: '',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Carbine'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WikiItemThumbnail), findsOneWidget);
+    // Track changes icon should be displayed for Carbine Rifle
+    expect(find.byIcon(Icons.track_changes), findsWidgets);
+    // Generic library_books icon should NOT be used for wiki results
+    expect(find.byIcon(Icons.library_books), findsNothing);
   });
 }
