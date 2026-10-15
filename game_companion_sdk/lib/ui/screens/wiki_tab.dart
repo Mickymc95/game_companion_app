@@ -5,6 +5,7 @@ import '../../sdk/widgets/app_cached_image.dart';
 import '../providers/scroll_providers.dart';
 import '../providers/wiki_providers.dart';
 import '../utils/wiki_icon_helper.dart';
+import '../widgets/wiki_item_thumbnail.dart';
 
 class WikiTab extends ConsumerStatefulWidget {
   const WikiTab({super.key});
@@ -97,51 +98,7 @@ class _WikiTabState extends ConsumerState<WikiTab> {
                     elevation: 1.5,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      leading: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: meta.accentColor.withValues(alpha: 0.35),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: AppCachedImage(
-                              imageUrl: item.thumbnailUrl,
-                              fit: BoxFit.contain,
-                              borderRadius: BorderRadius.circular(8),
-                              fallbackIcon: meta.icon,
-                              fallbackColor: meta.accentColor,
-                            ),
-                          ),
-                          Positioned(
-                            right: -3,
-                            bottom: -3,
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: meta.accentColor,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Icon(
-                                meta.icon,
-                                size: 10,
-                                color: meta.accentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      leading: WikiItemThumbnail(item: item),
                       title: Text(
                         item.title,
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
