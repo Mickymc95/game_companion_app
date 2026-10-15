@@ -11,16 +11,7 @@ final mapPoiProvider = FutureProvider<List<MapPointOfInterest>>((ref) async {
   final jsonString = await rootBundle.loadString('assets/data/gtav_map_pois.json');
   final List<dynamic> jsonList = json.decode(jsonString);
 
-  return jsonList.map((json) => MapPointOfInterest(
-    id: json['id'] as String,
-    title: json['title'] as String,
-    category: json['category'] as String,
-    x: (json['x'] as num).toDouble(),
-    y: (json['y'] as num).toDouble(),
-    description: json['description'] as String,
-    icon: json['icon'] as String,
-    isCollectable: json['isCollectable'] as bool? ?? false,
-  )).toList();
+  return jsonList.map((json) => MapPointOfInterest.fromJson(json)).toList();
 });
 
 // Provides all unique categories from the loaded POIs

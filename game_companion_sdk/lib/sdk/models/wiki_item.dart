@@ -14,4 +14,15 @@ class WikiItem {
     required this.description,
     required this.thumbnailUrl,
   });
+
+  factory WikiItem.fromJson(Map<String, dynamic> json) {
+    return WikiItem(
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? 'Unknown',
+      category: json['category'] as String? ?? 'Uncategorized',
+      stats: json['stats'] as Map<String, dynamic>? ?? {},
+      description: json['description'] as String? ?? '',
+      thumbnailUrl: json['thumbnailUrl'] as String? ?? '',
+    );
+  }
 }
