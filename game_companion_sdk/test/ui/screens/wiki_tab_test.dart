@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:game_companion_sdk/sdk/models/wiki_item.dart';
 import 'package:game_companion_sdk/ui/providers/wiki_providers.dart';
 import 'package:game_companion_sdk/ui/screens/wiki_tab.dart';
+import 'package:game_companion_sdk/ui/screens/wiki_detail_screen.dart';
 
 void main() {
   testWidgets('WikiTab renders list of items', (WidgetTester tester) async {

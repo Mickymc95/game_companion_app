@@ -6,7 +6,9 @@ import 'package:game_companion_sdk/ui/screens/map_tab.dart';
 import 'package:game_companion_sdk/sdk/storage/collection_tracker.dart';
 import 'package:game_companion_sdk/sdk/map/poi_provider.dart';
 import 'package:game_companion_sdk/sdk/models/map_poi.dart';
+import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 void main() {
   testWidgets('MapTab builds and shows filters and map', (WidgetTester tester) async {
@@ -43,5 +45,43 @@ void main() {
     expect(find.byType(FlutterMap), findsOneWidget);
     expect(find.byType(FilterChip), findsWidgets);
     expect(find.text('All'), findsOneWidget);
+  });
+
+  testWidgets('MapTab reacts to targetMapPositionProvider', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        poiProvider.overrideWith((ref) => Future.value([])),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(body: MapTab()),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify initial state
+    expect(find.byType(FlutterMap), findsOneWidget);
+
+    // Set a new target position
+    container.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
+      position: const LatLng(100.0, 100.0),
+      zoom: 3.5,
+    );
+
+    await tester.pumpAndSettle();
+
+    // After animation/build finishes, the target position should have been reset to null
+    final targetPos = container.read(targetMapPositionProvider);
+    expect(targetPos, isNull);
   });
 }
