@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:game_companion_sdk/sdk/models/wiki_item.dart';
 import 'package:game_companion_sdk/ui/providers/wiki_providers.dart';
+import 'package:game_companion_sdk/ui/providers/map_providers.dart';
+import 'package:game_companion_sdk/sdk/models/map_poi.dart';
 import 'package:game_companion_sdk/ui/screens/search_screen.dart';
 import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
 
@@ -13,6 +15,7 @@ void main() {
       ProviderScope(
         overrides: [
           wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
         ],
         child: const MaterialApp(
           home: SearchScreen(query: '   '),
@@ -27,6 +30,18 @@ void main() {
   });
 
   testWidgets('SearchScreen queries both POI and Wiki items correctly', (WidgetTester tester) async {
+    final mockPois = [
+      MapPointOfInterest(
+        id: '1',
+        name: 'Spaceship Part #1',
+        category: 'collectibles',
+        subCategory: 'spaceship_parts',
+        gameX: -1124.5,
+        gameY: 4812.1,
+        description: 'Located on top of the Mount Chiliad observation platform.',
+      )
+    ];
+
     final mockWikiItems = [
       WikiItem(
         id: 'w_1',
@@ -42,6 +57,8 @@ void main() {
       ProviderScope(
         overrides: [
           wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value(mockPois)),
         ],
         child: const MaterialApp(
           home: SearchScreen(query: 'Carbine'),
@@ -59,6 +76,8 @@ void main() {
       ProviderScope(
         overrides: [
           wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value(mockPois)),
         ],
         child: const MaterialApp(
           home: SearchScreen(query: 'Spaceship'),
@@ -76,9 +95,23 @@ void main() {
   testWidgets('Tapping map POI triggers target position provider', (WidgetTester tester) async {
     final mockWikiItems = <WikiItem>[];
 
+    final mockPois = [
+      MapPointOfInterest(
+        id: '1',
+        name: 'Spaceship Part #1',
+        category: 'collectibles',
+        subCategory: 'spaceship_parts',
+        gameX: -1124.5,
+        gameY: 4812.1,
+        description: 'Located on top of the Mount Chiliad observation platform.',
+      )
+    ];
+
     final container = ProviderContainer(
       overrides: [
         wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value(mockPois)),
       ],
     );
 
@@ -122,6 +155,18 @@ void main() {
   });
 
   testWidgets('Tapping Wiki item pushes to wiki detail screen', (WidgetTester tester) async {
+    final mockPois = [
+      MapPointOfInterest(
+        id: '1',
+        name: 'Spaceship Part #1',
+        category: 'collectibles',
+        subCategory: 'spaceship_parts',
+        gameX: -1124.5,
+        gameY: 4812.1,
+        description: 'Located on top of the Mount Chiliad observation platform.',
+      )
+    ];
+
     final mockWikiItems = [
       WikiItem(
         id: 'w_1',
@@ -136,6 +181,8 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value(mockPois)),
       ],
     );
 

@@ -1,14 +1,16 @@
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
-import '../../sdk/map/game_map.dart';
-import '../../sdk/map/coords_helper.dart';
-import '../../sdk/map/poi_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../games/gtav/fixtures.dart';
-import '../../sdk/storage/collection_tracker.dart';
-import '../providers/map_filter_provider.dart';
+import '../../sdk/map/coords_helper.dart';
+import '../../sdk/map/game_map.dart';
 import '../../sdk/models/map_poi.dart';
+import '../../sdk/models/wiki_item.dart';
+import '../../sdk/storage/collection_tracker.dart';
+import '../providers/map_providers.dart';
+import '../providers/wiki_providers.dart';
 import '../../sdk/map/target_map_position_provider.dart';
 
 class MapTab extends ConsumerStatefulWidget {
@@ -21,13 +23,14 @@ class MapTab extends ConsumerStatefulWidget {
 class _MapTabState extends ConsumerState<MapTab> {
   final MapController _mapController = MapController();
 
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final initialTarget = ref.read(targetMapPositionProvider);
-      if (initialTarget != null) {
-        _mapController.move(initialTarget.position, initialTarget.zoom);
+      final target = ref.read(targetMapPositionProvider);
+      if (target != null) {
+        _mapController.move(target.position, target.zoom);
         ref.read(targetMapPositionProvider.notifier).state = null;
       }
     });
@@ -35,10 +38,11 @@ class _MapTabState extends ConsumerState<MapTab> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
+
+        ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
       if (next != null) {
         _mapController.move(next.position, next.zoom);
-        // Reset the target state so we don't snap back to it randomly if map redraws
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(targetMapPositionProvider.notifier).state = null;
         });
@@ -47,7 +51,7 @@ class _MapTabState extends ConsumerState<MapTab> {
 
     final collectedState = ref.watch(collectionTrackerProvider);
     final filterState = ref.watch(mapFilterProvider);
-    final poiAsyncValue = ref.watch(poiProvider);
+    final poiAsyncValue = ref.watch(mapPoiProvider);
 
     return Scaffold(
       body: poiAsyncValue.when(
@@ -245,6 +249,19 @@ class _MapTabState extends ConsumerState<MapTab> {
           builder: (context, ref, child) {
             final isCollected =
                 ref.watch(collectionTrackerProvider).contains(poi.id);
+
+            // Attempt to find a matching WikiItem
+            final wikiItemsAsync = ref.watch(wikiItemsProvider);
+            final allWikiItems = wikiItemsAsync.valueOrNull ?? [];
+
+            final matchingWiki = allWikiItems.cast<WikiItem?>().firstWhere(
+              (wiki) => wiki != null && (
+                wiki.title.trim().toLowerCase() == poi.name.trim().toLowerCase() ||
+                wiki.id.trim().toLowerCase() == poi.id.trim().toLowerCase()
+              ),
+              orElse: () => null,
+            );
+
             return Container(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -273,7 +290,21 @@ class _MapTabState extends ConsumerState<MapTab> {
                         Navigator.pop(ctx);
                       },
                     ),
-                  )
+                  ),
+                  if (matchingWiki != null) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.library_books),
+                        label: const Text('Wiki / Lore'),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          context.push('/wiki/detail', extra: matchingWiki);
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             );
