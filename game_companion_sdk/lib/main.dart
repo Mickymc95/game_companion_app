@@ -7,6 +7,7 @@ import 'ui/screens/map_tab.dart';
 import 'ui/screens/wiki_tab.dart';
 import 'ui/screens/guides_tab.dart';
 import 'ui/screens/search_screen.dart';
+import 'ui/screens/wiki_detail_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sdk/storage/collection_tracker.dart';
 import 'sdk/models/wiki_item.dart';
@@ -50,19 +51,6 @@ final _router = GoRouter(
             GoRoute(
               path: '/wiki',
               builder: (context, state) => const WikiTab(),
-              routes: [
-                GoRoute(
-                  path: 'detail',
-                  builder: (context, state) {
-                    final item = state.extra as WikiItem?;
-                    if (item == null) {
-                      // Fallback for web refresh without extra state
-                      return const Scaffold(body: Center(child: Text('Item not found')));
-                    }
-                    return WikiDetailScreen(item: item);
-                  },
-                ),
-              ],
             ),
           ],
         ),
@@ -81,6 +69,17 @@ final _router = GoRouter(
       builder: (context, state) {
         final query = state.extra as String? ?? '';
         return SearchScreen(query: query);
+      },
+    ),
+    GoRoute(
+      path: '/wiki/detail',
+      builder: (context, state) {
+        final item = state.extra as WikiItem?;
+        if (item == null) {
+          // Fallback for web refresh without extra state
+          return const Scaffold(body: Center(child: Text('Item not found')));
+        }
+        return WikiDetailScreen(item: item);
       },
     ),
   ],

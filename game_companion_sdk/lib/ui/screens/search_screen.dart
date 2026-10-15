@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../games/gtav/fixtures.dart';
 import '../providers/wiki_providers.dart';
+import '../../sdk/map/coords_helper.dart';
+import '../../sdk/map/target_map_position_provider.dart';
 
 class SearchScreen extends ConsumerWidget {
   final String query;
@@ -28,7 +30,11 @@ class SearchScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Results for "\$query"'),
+        title: Text(
+          query.trim().isEmpty
+              ? 'Search Results'
+              : 'Search Results for "$query"',
+        ),
       ),
       body: CustomScrollView(
         slivers: [
@@ -53,8 +59,13 @@ class SearchScreen extends ConsumerWidget {
                     title: Text(poi.name),
                     subtitle: Text(poi.category),
                     onTap: () {
-                      // Navigate to Map Tab centered on POI (For now, we'll just go back and pop)
-                      Navigator.pop(context);
+                      final coords = inGameToMapCoords(poi.gameX, poi.gameY);
+                      ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
+                        position: coords,
+                        zoom: 4.5,
+                        poiId: poi.id,
+                      );
+                      context.go('/map');
                     },
                   );
                 },

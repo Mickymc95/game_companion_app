@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:game_companion_sdk/sdk/models/wiki_item.dart';
 import 'package:game_companion_sdk/ui/providers/wiki_providers.dart';
 import 'package:game_companion_sdk/ui/screens/search_screen.dart';
+import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
 
 void main() {
+  testWidgets('SearchScreen renders empty query correctly in AppBar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: '   '),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(find.text('Search Results for "   "'), findsNothing);
+  });
+
   testWidgets('SearchScreen queries both POI and Wiki items correctly', (WidgetTester tester) async {
     final mockWikiItems = [
       WikiItem(
@@ -51,5 +71,110 @@ void main() {
     expect(find.text('Map Locations'), findsOneWidget);
     expect(find.text('Spaceship Part #1'), findsOneWidget);
     expect(find.text('Wiki Entries'), findsNothing);
+  });
+
+  testWidgets('Tapping map POI triggers target position provider', (WidgetTester tester) async {
+    final mockWikiItems = <WikiItem>[];
+
+    final container = ProviderContainer(
+      overrides: [
+        wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+      ],
+    );
+
+    final router = GoRouter(
+      initialLocation: '/search',
+      routes: [
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(query: 'Spaceship'),
+        ),
+        GoRoute(
+          path: '/map',
+          builder: (context, state) => const Scaffold(body: Text('Map View')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap on map POI
+    await tester.tap(find.text('Spaceship Part #1'));
+    await tester.pumpAndSettle();
+
+    // Ensure we navigated to map
+    expect(find.text('Map View'), findsOneWidget);
+
+    // Verify provider was set
+    final targetPos = container.read(targetMapPositionProvider);
+    expect(targetPos, isNotNull);
+    expect(targetPos?.zoom, 4.5);
+    expect(targetPos?.poiId, isNotNull);
+  });
+
+  testWidgets('Tapping Wiki item pushes to wiki detail screen', (WidgetTester tester) async {
+    final mockWikiItems = [
+      WikiItem(
+        id: 'w_1',
+        title: 'Pistol',
+        category: 'Weapons',
+        stats: {'Damage': 0.5},
+        description: 'A standard pistol.',
+        thumbnailUrl: '',
+      )
+    ];
+
+    final container = ProviderContainer(
+      overrides: [
+        wikiItemsProvider.overrideWith((ref) => Future.value(mockWikiItems)),
+      ],
+    );
+
+    final router = GoRouter(
+      initialLocation: '/search',
+      routes: [
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(query: 'Pistol'),
+        ),
+        GoRoute(
+          path: '/wiki/detail',
+          builder: (context, state) {
+            final item = state.extra as WikiItem?;
+            if (item == null) return const Scaffold(body: Center(child: Text('Item not found')));
+            // Assuming WikiDetailScreen is accessible or we mock its view
+            // Since WikiDetailScreen requires a WikiItem, we mock it via a dummy text widget
+            return Scaffold(body: Text(item.description));
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap on wiki item
+    await tester.tap(find.text('Pistol').last);
+    await tester.pumpAndSettle();
+
+    // Ensure we navigated to wiki detail
+    expect(find.text('A standard pistol.'), findsOneWidget);
   });
 }
