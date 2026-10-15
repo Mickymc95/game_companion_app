@@ -8,6 +8,17 @@ class GameMap extends StatelessWidget {
   final List<Marker> markers;
   final LatLngBounds? bounds;
   final MapController? mapController;
+  final LatLng initialCenter;
+  final double initialZoom;
+  final double minZoom;
+  final double maxZoom;
+
+  /// Highest zoom level the tile server actually provides. Beyond this the
+  /// tiles from this level are upscaled instead of requesting missing tiles.
+  final int maxNativeZoom;
+
+  /// Colour shown behind/around the tiles (e.g. the ocean colour of the map).
+  final Color backgroundColor;
 
   const GameMap({
     super.key,
@@ -16,6 +27,12 @@ class GameMap extends StatelessWidget {
     required this.markers,
     this.bounds,
     this.mapController,
+    this.initialCenter = const LatLng(0, 0),
+    this.initialZoom = 3.0,
+    this.minZoom = 2.0,
+    this.maxZoom = 8.0,
+    this.maxNativeZoom = 7,
+    this.backgroundColor = const Color(0xFF1E5AA0),
   });
 
   @override
@@ -23,19 +40,20 @@ class GameMap extends StatelessWidget {
     return FlutterMap(
       mapController: mapController,
       options: MapOptions(
-        initialCenter: const LatLng(-4096.0, 4096.0),
-        initialZoom: 2.2,
-        minZoom: 1.0,
-        maxZoom: 5.0,
+        initialCenter: initialCenter,
+        initialZoom: initialZoom,
+        minZoom: minZoom,
+        maxZoom: maxZoom,
+        backgroundColor: backgroundColor,
         cameraConstraint: bounds != null
-            ? CameraConstraint.contain(bounds: bounds!)
+            ? CameraConstraint.containCenter(bounds: bounds!)
             : const CameraConstraint.unconstrained(),
         crs: const CrsSimple(),
       ),
       children: [
         TileLayer(
           urlTemplate: tileUrlTemplate,
-          fallbackUrl: tileUrlTemplate,
+          maxNativeZoom: maxNativeZoom,
           errorImage: AssetImage(fallbackAsset),
           errorTileCallback: (tile, error, stackTrace) {},
         ),

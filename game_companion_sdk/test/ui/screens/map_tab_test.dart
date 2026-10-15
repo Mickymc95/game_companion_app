@@ -10,7 +10,7 @@ import 'package:game_companion_sdk/ui/screens/map_tab.dart';
 import 'package:game_companion_sdk/sdk/storage/collection_tracker.dart';
 import 'package:game_companion_sdk/sdk/map/poi_provider.dart';
 import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:game_companion_sdk/sdk/map/coords_helper.dart';
 
 void main() {
   testWidgets('MapTab builds and shows filters and map', (WidgetTester tester) async {
@@ -82,8 +82,8 @@ void main() {
 
     // Set a new target position
     container.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
-      position: const LatLng(100.0, 100.0),
-      zoom: 3.5,
+      position: inGameToMapCoords(-500.0, 1200.0),
+      zoom: 4.5,
     );
 
     await tester.pump();
