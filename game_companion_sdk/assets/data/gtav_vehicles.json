@@ -1,28 +1,327 @@
 [
   {
     "id": "v_adder",
-    "title": "Adder",
+    "title": "Truffade Adder",
     "category": "Vehicles",
     "stats": {
-      "Speed": 0.85,
+      "Speed": 0.86,
       "Acceleration": 0.80,
       "Braking": 0.33,
       "Handling": 0.75
     },
-    "description": "A very fast supercar.",
-    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/f/f3/Adder-GTAV-front.png"
+    "description": "Inspired by the Bugatti Veyron, the Truffade Adder is one of the fastest straight-line hypercars in Los Santos, featuring an iconic aerodynamic rear wing.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/adder.webp"
   },
   {
     "id": "v_t20",
-    "title": "T20",
+    "title": "Progen T20",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.87,
+      "Acceleration": 0.88,
+      "Braking": 0.40,
+      "Handling": 0.82
+    },
+    "description": "Based on the McLaren P1, the T20 features an active hydraulic rear wing that raises at high speeds and tilts forward as an airbrake during hard deceleration.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/t20.webp"
+  },
+  {
+    "id": "v_zentorno",
+    "title": "Pegassi Zentorno",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.85,
+      "Acceleration": 0.89,
+      "Braking": 0.35,
+      "Handling": 0.80
+    },
+    "description": "Aggressive Lamborghini Veneno-inspired styling with hexagonal heat-shield rear louvers that make the rear window completely bulletproof against small arms.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/zentorno.webp"
+  },
+  {
+    "id": "v_entity_xf",
+    "title": "Överflöd Entity XF",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.84,
+      "Acceleration": 0.83,
+      "Braking": 0.33,
+      "Handling": 0.83
+    },
+    "description": "Modeled after the Koenigsegg CCX, the Entity XF boasts legendary high-speed traction and mid-engine stability through tight high-speed corners.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/entity_xf.webp"
+  },
+  {
+    "id": "v_turismo_r",
+    "title": "Grotti Turismo R",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.84,
+      "Acceleration": 0.85,
+      "Braking": 0.40,
+      "Handling": 0.81
+    },
+    "description": "A hybrid hypercar blending LaFerrari and McLaren P1 DNA, delivering instant electric motor throttle response and exceptional track downforce.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/turismo_r.webp"
+  },
+  {
+    "id": "v_cheetah",
+    "title": "Grotti Cheetah",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.82,
+      "Acceleration": 0.78,
+      "Braking": 0.30,
+      "Handling": 0.77
+    },
+    "description": "A low-slung, wedge-profile Italian supercar inspired by the Ferrari Enzo and Pagani Zonda with gullwing-style rear engine access.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/cheetah.webp"
+  },
+  {
+    "id": "v_infernus",
+    "title": "Pegassi Infernus",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.81,
+      "Acceleration": 0.76,
+      "Braking": 0.28,
+      "Handling": 0.74
+    },
+    "description": "A staple of the GTA franchise modeled on the Lamborghini Murciélago, featuring signature scissor doors and center-mounted triple exhaust.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/infernus.webp"
+  },
+  {
+    "id": "v_osiris",
+    "title": "Pegassi Osiris",
     "category": "Vehicles",
     "stats": {
       "Speed": 0.86,
       "Acceleration": 0.88,
-      "Braking": 0.40,
+      "Braking": 0.38,
       "Handling": 0.81
     },
-    "description": "The Progen T20 is a two-door hypercar featured in Grand Theft Auto V.",
-    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/4/4e/T20-GTAV-front.png"
+    "description": "Inspired by the Pagani Huayra with gullwing doors, twin-turbo V12 engine, and all-wheel-drive that provides instant launch control.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/osiris.webp"
+  },
+  {
+    "id": "v_elegy_rh8",
+    "title": "Annis Elegy RH8",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.80,
+      "Acceleration": 0.82,
+      "Braking": 0.35,
+      "Handling": 0.82
+    },
+    "description": "A Nissan GT-R counterpart renowned for its sophisticated AWD computer system that practically glues the car to the road through wet asphalt and asphalt chicanes.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/elegy_rh8.webp"
+  },
+  {
+    "id": "v_banshee",
+    "title": "Bravado Banshee",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.81,
+      "Acceleration": 0.79,
+      "Braking": 0.28,
+      "Handling": 0.72
+    },
+    "description": "The quintessential Dodge Viper tribute with high-displacement V10 power, broad oversteer tendencies, and unmistakable twin racing stripes.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/banshee.webp"
+  },
+  {
+    "id": "v_comet",
+    "title": "Pfister Comet",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.80,
+      "Acceleration": 0.83,
+      "Braking": 0.33,
+      "Handling": 0.76
+    },
+    "description": "A rear-engine German performance icon based on the Porsche 997 GT2, featuring explosive acceleration paired with a lively oversteering rear axle.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/comet.webp"
+  },
+  {
+    "id": "v_jester",
+    "title": "Dinka Jester",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.81,
+      "Acceleration": 0.80,
+      "Braking": 0.33,
+      "Handling": 0.79
+    },
+    "description": "A futuristic hybrid sports coupe reminiscent of the Acura/Honda NSX concept, combining sleek aerodynamics with confident all-wheel drive.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/jester.webp"
+  },
+  {
+    "id": "v_sultan",
+    "title": "Karin Sultan",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.75,
+      "Acceleration": 0.76,
+      "Braking": 0.25,
+      "Handling": 0.78
+    },
+    "description": "A fan-favorite four-door tuner heavily inspired by the Subaru Impreza WRX and Lexus IS300, capable of seamless tarmac-to-dirt rally performance.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/sultan.webp"
+  },
+  {
+    "id": "v_dominator",
+    "title": "Vapid Dominator",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.78,
+      "Acceleration": 0.75,
+      "Braking": 0.25,
+      "Handling": 0.65
+    },
+    "description": "A roaring American muscle icon modeled on the fifth-generation Ford Mustang, demanding throttle discipline to prevent spinning the rear wheels.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/dominator.webp"
+  },
+  {
+    "id": "v_gauntlet",
+    "title": "Bravado Gauntlet",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.77,
+      "Acceleration": 0.74,
+      "Braking": 0.28,
+      "Handling": 0.68
+    },
+    "description": "A modern muscle coupe styled after the Dodge Challenger, offering balanced handling and brute V8 power utilized extensively in heist getaways.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/gauntlet.webp"
+  },
+  {
+    "id": "v_sabre_turbo",
+    "title": "Declasse Sabre Turbo",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.75,
+      "Acceleration": 0.70,
+      "Braking": 0.22,
+      "Handling": 0.64
+    },
+    "description": "A vintage 1970s Chevrolet Chevelle tribute complete with an exposed shaker hood intake option and high-torque quarter-mile punch.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/sabre_turbo.webp"
+  },
+  {
+    "id": "v_bati_801",
+    "title": "Pegassi Bati 801",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.85,
+      "Acceleration": 0.90,
+      "Braking": 0.45,
+      "Handling": 0.78
+    },
+    "description": "Modeled after the Ducati 848/1098 sportbike, the Bati 801 is one of the most agile two-wheel vehicles, capable of sustained high-speed wheelies.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/bati_801.webp"
+  },
+  {
+    "id": "v_akuma",
+    "title": "Dinka Akuma",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.82,
+      "Acceleration": 0.96,
+      "Braking": 0.40,
+      "Handling": 0.75
+    },
+    "description": "A stripped-down streetfighter motorcycle based on the Buell XB12S with nearly unrivaled zero-to-sixty acceleration.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/akuma.webp"
+  },
+  {
+    "id": "v_sanchez",
+    "title": "Maibatsu Sanchez",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.68,
+      "Acceleration": 0.72,
+      "Braking": 0.30,
+      "Handling": 0.78
+    },
+    "description": "The quintessential off-road dirt bike capable of scaling Mount Chiliad cliffs, leaping sand dunes, and conquering rugged mountain trails.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/sanchez.webp"
+  },
+  {
+    "id": "v_buzzard",
+    "title": "Nagasaki Buzzard Attack Chopper",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.84,
+      "Acceleration": 0.82,
+      "Braking": 0.40,
+      "Handling": 0.85
+    },
+    "description": "A light military scout helicopter equipped with twin miniguns and lock-on missile pods, ideal for rapid aerial traversal across the map.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/buzzard.webp"
+  },
+  {
+    "id": "v_lazer",
+    "title": "JoBuilt P-996 LAZER",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.98,
+      "Acceleration": 0.95,
+      "Braking": 0.50,
+      "Handling": 0.90
+    },
+    "description": "An F-16 Falcon-inspired military fighter jet stationed at Fort Zancudo, armed with dual explosive cannon rounds and heat-seeking air-to-air missiles.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/lazer.webp"
+  },
+  {
+    "id": "v_hydra",
+    "title": "Mammoth Hydra",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.96,
+      "Acceleration": 0.92,
+      "Braking": 0.45,
+      "Handling": 0.86
+    },
+    "description": "A military attack jet equipped with VTOL (Vertical Take-Off and Landing) thrusters, allowing it to hover like a helicopter or cruise at supersonic speeds.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/hydra.webp"
+  },
+  {
+    "id": "v_sandking_xl",
+    "title": "Vapid Sandking XL",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.66,
+      "Acceleration": 0.60,
+      "Braking": 0.20,
+      "Handling": 0.60
+    },
+    "description": "A massive lifted heavy-duty 4x4 pickup truck based on the Ford Super Duty, featuring enormous ground clearance and off-road capability.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/sandking_xl.webp"
+  },
+  {
+    "id": "v_dubsta",
+    "title": "Benefactor Dubsta",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.70,
+      "Acceleration": 0.68,
+      "Braking": 0.28,
+      "Handling": 0.66
+    },
+    "description": "A luxury German SUV inspired by the Mercedes-Benz G-Class, combining plush interior status with rugged four-wheel-drive rock crawling.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/dubsta.webp"
+  },
+  {
+    "id": "v_karin_rebel",
+    "title": "Karin Rebel",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.64,
+      "Acceleration": 0.62,
+      "Braking": 0.22,
+      "Handling": 0.65
+    },
+    "description": "A battle-hardened 1980s Toyota Hilux 4WD pickup favored by Blaine County survivalists for its indestructible frame and baja rally modifications.",
+    "thumbnailUrl": "https://mickymc95.github.io/game_companion_app/media/gtav/vehicles/karin_rebel.webp"
   }
 ]
