@@ -1,0 +1,28 @@
+[
+  {
+    "id": "w_carbine_rifle",
+    "title": "Carbine Rifle",
+    "category": "Weapons",
+    "stats": {
+      "Damage": 0.30,
+      "Fire Rate": 0.65,
+      "Accuracy": 0.55,
+      "Range": 0.45
+    },
+    "description": "A standard assault rifle.",
+    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/5/52/CarbineRifle-GTAV-icon.png"
+  },
+  {
+    "id": "w_pistol",
+    "title": "Pistol",
+    "category": "Weapons",
+    "stats": {
+      "Damage": 0.26,
+      "Fire Rate": 0.40,
+      "Accuracy": 0.40,
+      "Range": 0.25
+    },
+    "description": "A standard handgun.",
+    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/4/4d/Pistol-GTAV-icon.png"
+  }
+]

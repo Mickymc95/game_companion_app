@@ -1,0 +1,28 @@
+[
+  {
+    "id": "v_adder",
+    "title": "Adder",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.85,
+      "Acceleration": 0.80,
+      "Braking": 0.33,
+      "Handling": 0.75
+    },
+    "description": "A very fast supercar.",
+    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/f/f3/Adder-GTAV-front.png"
+  },
+  {
+    "id": "v_t20",
+    "title": "T20",
+    "category": "Vehicles",
+    "stats": {
+      "Speed": 0.86,
+      "Acceleration": 0.88,
+      "Braking": 0.40,
+      "Handling": 0.81
+    },
+    "description": "The Progen T20 is a two-door hypercar featured in Grand Theft Auto V.",
+    "thumbnailUrl": "https://static.wikia.nocookie.net/gtawiki/images/4/4e/T20-GTAV-front.png"
+  }
+]
