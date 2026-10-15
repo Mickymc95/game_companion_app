@@ -26,7 +26,10 @@ void main() async {
   );
 }
 
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final _router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: '/map',
   routes: [
     GoRoute(
@@ -72,6 +75,7 @@ final _router = GoRouter(
       },
     ),
     GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
       path: '/wiki/detail',
       builder: (context, state) {
         final item = state.extra as WikiItem?;

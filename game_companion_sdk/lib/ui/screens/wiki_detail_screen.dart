@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../sdk/models/wiki_item.dart';
 import '../../sdk/widgets/app_cached_image.dart';
 
@@ -9,7 +10,20 @@ class WikiDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(item.title)),
+      appBar: AppBar(
+        title: Text(item.title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/wiki');
+            }
+          },
+          tooltip: 'Back',
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

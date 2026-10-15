@@ -82,7 +82,7 @@ class _WikiTabState extends ConsumerState<WikiTab> {
                       subtitle: Text(item.category),
                       onTap: () {
                         // Open detailed view with stats
-                        context.go('/wiki/detail', extra: item);
+                        context.push('/wiki/detail', extra: item);
                       },
                     ),
                   );
