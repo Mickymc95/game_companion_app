@@ -1,2 +1,5 @@
 requests
 Pillow
+beautifulsoup4
+requests
+Pillow

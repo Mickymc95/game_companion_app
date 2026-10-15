@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../games/gtav/fixtures.dart';
+import '../providers/wiki_providers.dart';
 
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends ConsumerWidget {
   final String query;
 
   const SearchScreen({super.key, required this.query});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final lowerQuery = query.toLowerCase();
 
     // Search POIs
@@ -17,7 +19,10 @@ class SearchScreen extends StatelessWidget {
     ).toList();
 
     // Search Wiki Items
-    final matchedWiki = GTAVFixtures.wikiItems.where(
+    final wikiItemsAsync = ref.watch(wikiItemsProvider);
+    final allWikiItems = wikiItemsAsync.valueOrNull ?? [];
+
+    final matchedWiki = allWikiItems.where(
       (item) => item.title.toLowerCase().contains(lowerQuery) || item.description.toLowerCase().contains(lowerQuery)
     ).toList();
 
