@@ -8,12 +8,42 @@ import '../../games/gtav/fixtures.dart';
 import '../../sdk/storage/collection_tracker.dart';
 import '../providers/map_filter_provider.dart';
 import '../../sdk/models/map_poi.dart';
+import '../../sdk/map/target_map_position_provider.dart';
 
-class MapTab extends ConsumerWidget {
+class MapTab extends ConsumerStatefulWidget {
   const MapTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MapTab> createState() => _MapTabState();
+}
+
+class _MapTabState extends ConsumerState<MapTab> {
+  final MapController _mapController = MapController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final initialTarget = ref.read(targetMapPositionProvider);
+      if (initialTarget != null) {
+        _mapController.move(initialTarget.position, initialTarget.zoom);
+        ref.read(targetMapPositionProvider.notifier).state = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
+      if (next != null) {
+        _mapController.move(next.position, next.zoom);
+        // Reset the target state so we don't snap back to it randomly if map redraws
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(targetMapPositionProvider.notifier).state = null;
+        });
+      }
+    });
+
     final collectedState = ref.watch(collectionTrackerProvider);
     final filterState = ref.watch(mapFilterProvider);
     final poiAsyncValue = ref.watch(poiProvider);
@@ -88,6 +118,7 @@ class MapTab extends ConsumerWidget {
           return Stack(
             children: [
               GameMap(
+                mapController: _mapController,
                 tileUrlTemplate:
                     'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
                 fallbackAsset: GTAVFixtures.fallbackMapAsset,
