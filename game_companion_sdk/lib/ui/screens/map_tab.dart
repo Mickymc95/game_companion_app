@@ -127,7 +127,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                     'https://gta5-map.github.io/tiles/road/{z}-{x}_{y}.png',
                 fallbackAsset: GTAVFixtures.fallbackMapAsset,
                 markers: markers,
-                bounds: kGtaMapBounds,
+                bounds: kGtaMapPanBounds,
                 initialCenter: kGtaMapCenter,
               ),
               Positioned(

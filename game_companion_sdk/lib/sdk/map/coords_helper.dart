@@ -24,6 +24,13 @@ final LatLngBounds kGtaMapBounds = LatLngBounds(
   const LatLng(-kGtaMapSize, kGtaMapSize),
 );
 
+/// Panning bounds with generous margin around the island so users can pan
+/// smoothly without hitting rigid boundaries.
+final LatLngBounds kGtaMapPanBounds = LatLngBounds(
+  const LatLng(kGtaMapSize * 0.4, -kGtaMapSize * 0.4),
+  const LatLng(-kGtaMapSize * 1.4, kGtaMapSize * 1.4),
+);
+
 /// Centre of the map image in CrsSimple coordinates.
 const LatLng kGtaMapCenter = LatLng(-kGtaMapSize / 2, kGtaMapSize / 2);
 

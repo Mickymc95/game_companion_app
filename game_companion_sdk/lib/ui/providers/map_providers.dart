@@ -24,7 +24,7 @@ final mapCategoriesProvider = Provider<List<String>>((ref) {
 class MapFilterNotifier extends StateNotifier<Set<String>> {
   bool _isInitialized = false;
 
-  MapFilterNotifier() : super({});
+  MapFilterNotifier() : super({'collectibles', 'stunts', 'services'});
 
   void toggleCategory(String category) {
     if (state.contains(category)) {

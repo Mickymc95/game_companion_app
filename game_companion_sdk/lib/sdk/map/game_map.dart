@@ -12,6 +12,7 @@ class GameMap extends StatelessWidget {
   final double initialZoom;
   final double minZoom;
   final double maxZoom;
+  final TileProvider? tileProvider;
 
   /// Highest zoom level the tile server actually provides. Beyond this the
   /// tiles from this level are upscaled instead of requesting missing tiles.
@@ -28,11 +29,12 @@ class GameMap extends StatelessWidget {
     this.bounds,
     this.mapController,
     this.initialCenter = const LatLng(0, 0),
-    this.initialZoom = 3.0,
-    this.minZoom = 2.0,
-    this.maxZoom = 8.0,
+    this.initialZoom = 2.8,
+    this.minZoom = 1.5,
+    this.maxZoom = 7.0,
     this.maxNativeZoom = 7,
     this.backgroundColor = const Color(0xFF1E5AA0),
+    this.tileProvider,
   });
 
   @override
@@ -45,6 +47,10 @@ class GameMap extends StatelessWidget {
         minZoom: minZoom,
         maxZoom: maxZoom,
         backgroundColor: backgroundColor,
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+          enableMultiFingerGestureRace: true,
+        ),
         cameraConstraint: bounds != null
             ? CameraConstraint.containCenter(bounds: bounds!)
             : const CameraConstraint.unconstrained(),
@@ -54,6 +60,12 @@ class GameMap extends StatelessWidget {
         TileLayer(
           urlTemplate: tileUrlTemplate,
           maxNativeZoom: maxNativeZoom,
+          tileProvider: tileProvider ?? NetworkTileProvider(silenceExceptions: true),
+          panBuffer: 1,
+          keepBuffer: 3,
+          tileDisplay: const TileDisplay.fadeIn(
+            duration: Duration(milliseconds: 100),
+          ),
           errorImage: AssetImage(fallbackAsset),
           errorTileCallback: (tile, error, stackTrace) {},
         ),
