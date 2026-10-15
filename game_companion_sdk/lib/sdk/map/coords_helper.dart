@@ -75,3 +75,4 @@ MapPointOfInterest? findNearestPoi(
 
   return nearest;
 }
+
