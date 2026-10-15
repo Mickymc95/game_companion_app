@@ -39,6 +39,17 @@ class WikiDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              try {
+                context.go('/wiki');
+              } catch (_) {}
+            }
+          },
+        ),
         title: Text(item.title),
         actions: [
           Padding(
