@@ -23,7 +23,7 @@ class GameMap extends StatelessWidget {
     return FlutterMap(
       mapController: mapController,
       options: MapOptions(
-        initialCenter: const LatLng(-4096.0, 4096.0),
+        initialCenter: const LatLng(-45.0, 45.0),
         initialZoom: 2.2,
         minZoom: 1.0,
         maxZoom: 5.0,
@@ -33,6 +33,15 @@ class GameMap extends StatelessWidget {
         crs: const CrsSimple(),
       ),
       children: [
+        if (bounds != null)
+          OverlayImageLayer(
+            overlayImages: [
+              OverlayImage(
+                bounds: bounds!,
+                imageProvider: AssetImage(fallbackAsset),
+              )
+            ]
+          ),
         TileLayer(
           urlTemplate: tileUrlTemplate,
           fallbackUrl: tileUrlTemplate,
