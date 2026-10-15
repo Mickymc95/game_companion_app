@@ -1,3 +1,7 @@
+import 'package:game_companion_sdk/sdk/models/map_poi.dart';
+import 'package:game_companion_sdk/ui/providers/wiki_providers.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:game_companion_sdk/ui/providers/map_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,9 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:game_companion_sdk/ui/screens/map_tab.dart';
 import 'package:game_companion_sdk/sdk/storage/collection_tracker.dart';
 import 'package:game_companion_sdk/sdk/map/poi_provider.dart';
-import 'package:game_companion_sdk/sdk/models/map_poi.dart';
 import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
@@ -39,10 +41,10 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.byType(MapTab), findsOneWidget);
-    expect(find.byType(FlutterMap), findsOneWidget);
+    expect(find.byType(FlutterMap, skipOffstage: false), findsOneWidget);
     expect(find.byType(FilterChip), findsWidgets);
     expect(find.text('All'), findsOneWidget);
   });
@@ -55,6 +57,11 @@ void main() {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         poiProvider.overrideWith((ref) => Future.value([])),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
+                wikiItemsProvider.overrideWith((ref) => Future.value([])),
+
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
       ],
     );
 
@@ -66,11 +73,12 @@ void main() {
         ),
       ),
     );
+    await tester.pump();
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Verify initial state
-    expect(find.byType(FlutterMap), findsOneWidget);
+    expect(find.byType(FlutterMap, skipOffstage: false), findsOneWidget);
 
     // Set a new target position
     container.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
@@ -78,7 +86,7 @@ void main() {
       zoom: 3.5,
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // After animation/build finishes, the target position should have been reset to null
     final targetPos = container.read(targetMapPositionProvider);

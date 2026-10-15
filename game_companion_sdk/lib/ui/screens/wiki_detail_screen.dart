@@ -1,13 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../sdk/models/wiki_item.dart';
+import '../../sdk/models/map_poi.dart';
 import '../../sdk/widgets/app_cached_image.dart';
+import '../providers/map_providers.dart';
+import '../../sdk/map/coords_helper.dart';
+import '../../sdk/map/target_map_position_provider.dart';
 
-class WikiDetailScreen extends StatelessWidget {
+class WikiDetailScreen extends ConsumerWidget {
   final WikiItem item;
   const WikiDetailScreen({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Attempt to find a matching POI
+    final mapPoisAsync = ref.watch(mapPoiProvider);
+    final allPois = mapPoisAsync.valueOrNull ?? [];
+
+    final matchingPoi = allPois.cast<MapPointOfInterest?>().firstWhere(
+      (poi) => poi != null && (
+        poi.name.trim().toLowerCase() == item.title.trim().toLowerCase() ||
+        poi.id.trim().toLowerCase() == item.id.trim().toLowerCase()
+      ),
+      orElse: () => null,
+    );
+
     return Scaffold(
       appBar: AppBar(title: Text(item.title)),
       body: ListView(
@@ -33,6 +51,25 @@ class WikiDetailScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (matchingPoi != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.map),
+                label: const Text('View on Map'),
+                onPressed: () {
+                  final coords = inGameToMapCoords(matchingPoi.gameX, matchingPoi.gameY);
+                  ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
+                    position: coords,
+                    zoom: 4.5,
+                    poiId: matchingPoi.id,
+                  );
+                  context.go('/map');
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           Text('Statistics', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
