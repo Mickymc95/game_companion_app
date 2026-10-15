@@ -1,5 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../models/map_poi.dart';
 
 /// Size (in CrsSimple map units) of the GTA V map image served by
 /// https://gta5-map.github.io/tiles/.
@@ -39,4 +41,37 @@ LatLng inGameToMapCoords(double gameX, double gameY) {
   // Higher in-game Y is further north, i.e. closer to the top of the image.
   final double mapY = -(_gameTopY - gameY) / _gameUnitsPerMapUnit;
   return LatLng(mapY, mapX);
+}
+
+/// Calculate standard Euclidean distance between two points in in-game coordinate space.
+double distanceBetweenInGameCoords(double x1, double y1, double x2, double y2) {
+  final dx = x2 - x1;
+  final dy = y2 - y1;
+  return math.sqrt(dx * dx + dy * dy);
+}
+
+/// Finds the closest uncollected [MapPointOfInterest] to [fromPoi] from a collection of candidates.
+/// Excludes the [fromPoi] itself if present in [candidates].
+MapPointOfInterest? findNearestPoi(
+  MapPointOfInterest fromPoi,
+  Iterable<MapPointOfInterest> candidates,
+) {
+  MapPointOfInterest? nearest;
+  double minDistance = double.infinity;
+
+  for (final candidate in candidates) {
+    if (candidate.id == fromPoi.id) continue;
+    final dist = distanceBetweenInGameCoords(
+      fromPoi.gameX,
+      fromPoi.gameY,
+      candidate.gameX,
+      candidate.gameY,
+    );
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearest = candidate;
+    }
+  }
+
+  return nearest;
 }
