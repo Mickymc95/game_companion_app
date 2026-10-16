@@ -12,6 +12,11 @@ import 'package:game_companion_sdk/ui/widgets/wiki_item_thumbnail.dart';
 import 'package:game_companion_sdk/sdk/models/guide_article.dart';
 import 'package:game_companion_sdk/ui/providers/guides_provider.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:game_companion_sdk/ui/screens/map_tab.dart';
+import 'package:game_companion_sdk/sdk/map/poi_provider.dart';
+import 'package:game_companion_sdk/sdk/storage/collection_tracker.dart';
+
 void main() {
   testWidgets('SearchScreen renders empty query correctly in AppBar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -155,6 +160,7 @@ void main() {
     expect(targetPos, isNotNull);
     expect(targetPos?.zoom, 4.5);
     expect(targetPos?.poiId, isNotNull);
+    expect(targetPos?.shakeAndOpenCard, isTrue);
   });
 
   testWidgets('Tapping Wiki item pushes to wiki detail screen', (WidgetTester tester) async {
@@ -519,6 +525,77 @@ void main() {
 
     // Trailing chevron
     expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+  });
+
+  testWidgets('Selecting search map POI navigates to MapTab, shakes marker icon, and opens info card upon arrival', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    final testPois = [
+      MapPointOfInterest(
+        id: 'search_poi_1',
+        name: 'Spaceship Part #1',
+        category: 'collectibles',
+        subCategory: 'spaceship_parts',
+        gameX: -1124.5,
+        gameY: 4812.1,
+        description: 'Located on top of the Mount Chiliad observation platform.',
+        isCollectable: true,
+      ),
+    ];
+
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
+        mapPoiProvider.overrideWith((ref) => Future.value(testPois)),
+        poiProvider.overrideWith((ref) => Future.value(testPois)),
+      ],
+    );
+
+    final router = GoRouter(
+      initialLocation: '/search',
+      routes: [
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(query: 'Spaceship'),
+        ),
+        GoRoute(
+          path: '/map',
+          builder: (context, state) => const MapTab(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify search screen shows the item
+    expect(find.text('Spaceship Part #1'), findsOneWidget);
+
+    // Tap search result
+    await tester.tap(find.text('Spaceship Part #1'));
+    await tester.pump();
+    // Allow arrival navigation and settle frame
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Arrived at map tab and targeted marker is shaking
+    expect(find.byKey(const Key('shaking_marker_icon_search_poi_1')), findsOneWidget);
+
+    // Advance 1000ms duration
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pumpAndSettle();
+
+    // Shake completed and info card opened automatically
+    expect(find.byKey(const Key('shaking_marker_icon_search_poi_1')), findsNothing);
+    expect(find.text('Located on top of the Mount Chiliad observation platform.'), findsOneWidget);
   });
 }
 

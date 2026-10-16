@@ -243,6 +243,7 @@ class SearchScreen extends ConsumerWidget {
                               position: coords,
                               zoom: 4.5,
                               poiId: poi.id,
+                              shakeAndOpenCard: true,
                             );
                             context.go('/map');
                           }

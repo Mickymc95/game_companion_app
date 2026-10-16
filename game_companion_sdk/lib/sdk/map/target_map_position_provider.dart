@@ -5,12 +5,14 @@ class TargetMapPosition {
   final LatLng position;
   final double zoom;
   final String? poiId;
+  final bool shakeAndOpenCard;
 
   TargetMapPosition({
     required this.position,
     required this.zoom,
     this.poiId,
-  });
+    bool? shakeAndOpenCard,
+  }) : shakeAndOpenCard = shakeAndOpenCard ?? (poiId != null);
 }
 
 final targetMapPositionProvider = StateProvider<TargetMapPosition?>((ref) => null);

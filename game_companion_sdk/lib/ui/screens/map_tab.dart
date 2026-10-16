@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,32 +21,165 @@ class MapTab extends ConsumerStatefulWidget {
   ConsumerState<MapTab> createState() => _MapTabState();
 }
 
-class _MapTabState extends ConsumerState<MapTab> {
+class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateMixin {
   final MapController _mapController = MapController();
+  late final AnimationController _shakeController;
+  String? _shakingPoiId;
+  int _shakeSequence = 0;
 
   @override
   void initState() {
     super.initState();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final target = ref.read(targetMapPositionProvider);
       if (target != null) {
-        _mapController.move(target.position, target.zoom);
+        _handleTargetMapPosition(target);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _shakeSequence++;
+    if (_shakeController.isAnimating) {
+      _shakeController.stop();
+    }
+    _shakeController.dispose();
+    super.dispose();
+  }
+
+  bool _isMapTabActive() {
+    if (!mounted) return false;
+    final modalRoute = ModalRoute.of(context);
+    if (modalRoute != null && !modalRoute.isCurrent) return false;
+    if (!TickerMode.of(context)) return false;
+    try {
+      final loc = GoRouterState.of(context).matchedLocation;
+      if (loc.isNotEmpty && loc != '/map') return false;
+    } catch (_) {
+      // In isolated test environments where GoRouter is not injected
+    }
+    return true;
+  }
+
+  void _cancelShake() {
+    _shakeSequence++;
+    if (_shakeController.isAnimating) {
+      _shakeController.stop();
+    }
+    _shakeController.reset();
+    if (_shakingPoiId != null && mounted) {
+      setState(() {
+        _shakingPoiId = null;
+      });
+    }
+  }
+
+  void _handleTargetMapPosition(TargetMapPosition target) {
+    _mapController.move(target.position, target.zoom);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ref.read(targetMapPositionProvider) != null) {
         ref.read(targetMapPositionProvider.notifier).state = null;
       }
     });
+
+    if (target.poiId != null && target.shakeAndOpenCard) {
+      _triggerMarkerShakeAndInfoCard(target.poiId!);
+    }
+  }
+
+  Future<void> _triggerMarkerShakeAndInfoCard(String poiId) async {
+    final int currentSequence = ++_shakeSequence;
+    if (_shakeController.isAnimating) {
+      _shakeController.stop();
+    }
+    _shakeController.reset();
+
+    List<MapPointOfInterest> pois = ref.read(mapPoiProvider).valueOrNull ?? [];
+    if (pois.isEmpty) {
+      try {
+        pois = await ref.read(mapPoiProvider.future);
+      } catch (_) {}
+    }
+
+    if (!mounted || _shakeSequence != currentSequence) return;
+
+    // If arriving from another screen (such as /search), wait until the map screen
+    // is active and rendered so the user sees the shake animation on arrival.
+    int retries = 0;
+    while (mounted && _shakeSequence == currentSequence && !_isMapTabActive() && retries < 15) {
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      retries++;
+    }
+
+    if (!mounted || _shakeSequence != currentSequence || !_isMapTabActive()) return;
+
+    final targetPoi = pois.cast<MapPointOfInterest?>().firstWhere(
+      (p) => p?.id == poiId,
+      orElse: () => null,
+    );
+
+    if (targetPoi == null) return;
+
+    ref.read(mapFilterProvider.notifier).enableSubcategory(targetPoi.subCategory);
+    // Keep original map item icon instead of changing it to target symbol (Icons.my_location)
+    if (ref.read(highlightedPoiProvider) != null) {
+      ref.read(highlightedPoiProvider.notifier).state = null;
+    }
+
+    setState(() {
+      _shakingPoiId = targetPoi.id;
+    });
+
+    try {
+      await _shakeController.forward(from: 0.0);
+    } catch (_) {}
+
+    // Only proceed if this shake animation completed naturally without being cancelled,
+    // superseded by another target, or interrupted by user interaction or screen departure.
+    if (!mounted || _shakeSequence != currentSequence) {
+      return;
+    }
+
+    if (_shakeController.status != AnimationStatus.completed || !_isMapTabActive()) {
+      if (_shakingPoiId != null && mounted) {
+        setState(() {
+          _shakingPoiId = null;
+        });
+      }
+      return;
+    }
+
+    if (_shakingPoiId != null && mounted) {
+      setState(() {
+        _shakingPoiId = null;
+      });
+    }
+
+    _showPoiDetails(context, ref, targetPoi);
   }
 
   @override
   Widget build(BuildContext context) {
     ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
       if (next != null) {
-        _mapController.move(next.position, next.zoom);
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(targetMapPositionProvider.notifier).state = null;
-        });
+        _handleTargetMapPosition(next);
       }
     });
+
+    if (_shakingPoiId != null && !_isMapTabActive()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _shakingPoiId != null && !_isMapTabActive()) {
+          _cancelShake();
+        }
+      });
+    }
 
     final collectedState = ref.watch(collectionTrackerProvider);
     final filterState = ref.watch(mapFilterProvider);
@@ -60,13 +194,15 @@ class _MapTabState extends ConsumerState<MapTab> {
         data: (pois) {
           final filteredPois = pois.where((poi) {
             final isCollected = collectedState.contains(poi.id);
-            return filterState.isSubcategoryEnabled(poi.subCategory) &&
-                (!hideCollected || !isCollected);
+            final isTargeted = _shakingPoiId == poi.id || highlightedPoi?.id == poi.id;
+            return isTargeted || (filterState.isSubcategoryEnabled(poi.subCategory) &&
+                (!hideCollected || !isCollected));
           }).toList();
 
           final markers = filteredPois.map((poi) {
             final isCollected = collectedState.contains(poi.id);
             final isHighlighted = highlightedPoi?.id == poi.id;
+            final isShaking = _shakingPoiId == poi.id;
             final style = getPoiStyle(poi);
 
             final markerColor = isHighlighted ? Colors.amber : style.color;
@@ -78,7 +214,9 @@ class _MapTabState extends ConsumerState<MapTab> {
               width: markerSize,
               height: markerSize,
               child: GestureDetector(
+                key: Key('map_marker_${poi.id}'),
                 onTap: () {
+                  _cancelShake();
                   _showPoiDetails(context, ref, poi);
                 },
                 child: Opacity(
@@ -104,11 +242,19 @@ class _MapTabState extends ConsumerState<MapTab> {
                               : null,
                         ),
                         child: Center(
-                          child: Icon(
-                            markerIcon,
-                            color: Colors.white,
-                            size: isHighlighted ? 24 : 22,
-                          ),
+                          child: isShaking
+                              ? _ShakingMarkerIcon(
+                                  key: Key('shaking_marker_icon_${poi.id}'),
+                                  icon: markerIcon,
+                                  color: Colors.white,
+                                  size: isHighlighted ? 24 : 22,
+                                  animation: _shakeController,
+                                )
+                              : Icon(
+                                  markerIcon,
+                                  color: Colors.white,
+                                  size: isHighlighted ? 24 : 22,
+                                ),
                         ),
                       ),
                       if (isCollected)
@@ -164,8 +310,11 @@ class _MapTabState extends ConsumerState<MapTab> {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                            onPressed: () => _showCompletionSummarySheet(
-                                context, ref, completionSummary),
+                            onPressed: () {
+                              _cancelShake();
+                              _showCompletionSummarySheet(
+                                  context, ref, completionSummary);
+                            },
                           ),
                           const SizedBox(width: 8),
 
@@ -217,7 +366,10 @@ class _MapTabState extends ConsumerState<MapTab> {
                   foregroundColor: Theme.of(context).colorScheme.primary,
                   tooltip: 'Switch Map Layer',
                   child: Icon(activeLayer.icon),
-                  onPressed: () => _showLayerSwitcherSheet(context, ref),
+                  onPressed: () {
+                    _cancelShake();
+                    _showLayerSwitcherSheet(context, ref);
+                  },
                 ),
               ),
             ],
@@ -230,6 +382,7 @@ class _MapTabState extends ConsumerState<MapTab> {
         heroTag: 'map_category_filter',
         child: const Icon(Icons.filter_list),
         onPressed: () {
+          _cancelShake();
           _showFilterSheet(context, ref);
         },
       ),
@@ -923,8 +1076,10 @@ class _MapTabState extends ConsumerState<MapTab> {
                                 duration: const Duration(seconds: 4),
                                 action: SnackBarAction(
                                   label: 'View',
-                                  onPressed: () =>
-                                      _showPoiDetails(context, ref, nearest),
+                                  onPressed: () {
+                                    _cancelShake();
+                                    _showPoiDetails(context, ref, nearest);
+                                  },
                                 ),
                               ),
                             );
@@ -986,6 +1141,48 @@ class _MapTabState extends ConsumerState<MapTab> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ShakingMarkerIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final Animation<double> animation;
+
+  const _ShakingMarkerIcon({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.size,
+    required this.animation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final progress = animation.value;
+        // ~5 full oscillation cycles over ~1000ms duration
+        final double wobble = math.sin(progress * 10 * math.pi);
+        // Slightly damp over time so it rests cleanly at completion
+        final double damping = (1.0 - progress * 0.4);
+        final double dx = wobble * 6.0 * damping;
+        final double rotation = wobble * 0.18 * damping;
+
+        return Transform(
+          transform: Matrix4.translationValues(dx, 0.0, 0.0)..rotateZ(rotation),
+          alignment: Alignment.center,
+          child: child,
+        );
+      },
+      child: Icon(
+        icon,
+        color: color,
+        size: size,
       ),
     );
   }

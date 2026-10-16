@@ -217,6 +217,13 @@ class MapFilterState {
     return MapFilterState(enabledSubcategories: current);
   }
 
+  /// Helper to ensure a specific subcategory is enabled.
+  MapFilterState enableSubcategory(String subCategory) {
+    if (enabledSubcategories.contains(subCategory)) return this;
+    final current = Set<String>.from(enabledSubcategories)..add(subCategory);
+    return MapFilterState(enabledSubcategories: current);
+  }
+
   /// Helper to toggle category group and return a new state.
   MapFilterState toggleCategoryGroup(dynamic categoryOrSubcategories) {
     final Iterable<String> subcats = categoryOrSubcategories is String
@@ -293,6 +300,11 @@ class MapFilterNotifier extends StateNotifier<MapFilterState> {
   /// Toggles an individual subcategory on or off.
   void toggleSubcategory(String subCategory) {
     state = state.toggleSubcategory(subCategory);
+  }
+
+  /// Ensures an individual subcategory is enabled.
+  void enableSubcategory(String subCategory) {
+    state = state.enableSubcategory(subCategory);
   }
 
   /// Toggles an entire category group on or off.
