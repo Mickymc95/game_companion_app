@@ -9,6 +9,8 @@ import 'package:game_companion_sdk/sdk/models/map_poi.dart';
 import 'package:game_companion_sdk/ui/screens/search_screen.dart';
 import 'package:game_companion_sdk/sdk/map/target_map_position_provider.dart';
 import 'package:game_companion_sdk/ui/widgets/wiki_item_thumbnail.dart';
+import 'package:game_companion_sdk/sdk/models/guide_article.dart';
+import 'package:game_companion_sdk/ui/providers/guides_provider.dart';
 
 void main() {
   testWidgets('SearchScreen renders empty query correctly in AppBar', (WidgetTester tester) async {
@@ -301,5 +303,223 @@ void main() {
     // Generic location_on icon should NOT be used for styled map results
     expect(find.byIcon(Icons.location_on), findsNothing);
   });
+
+  testWidgets("SearchScreen queries guide articles and renders 'Guides & Tutorials' section", (WidgetTester tester) async {
+    const mockGuides = [
+      GuideArticle(
+        id: 'guide_lester',
+        title: 'Lester Assassinations & Stock Market',
+        category: 'Money & Stock Market',
+        tags: ['Money', 'Stock', 'BAWSAQ'],
+        difficulty: 'Intermediate',
+        readTimeMinutes: 8,
+        contentMarkdown: '# Stock Market\n\nInvest in Betta Pharmaceuticals.',
+        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Lester'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Guides & Tutorials'), findsOneWidget);
+    expect(find.text('Lester Assassinations & Stock Market'), findsOneWidget);
+    expect(find.text('Map Locations'), findsNothing);
+    expect(find.text('Wiki Entries'), findsNothing);
+  });
+
+  testWidgets('SearchScreen matches guides by title, category, tags, and contentMarkdown', (WidgetTester tester) async {
+    const mockGuides = [
+      GuideArticle(
+        id: 'guide_1',
+        title: 'Lester Assassinations',
+        category: 'Money & Stock Market',
+        tags: ['BAWSAQ', 'Investment'],
+        difficulty: 'Intermediate',
+        readTimeMinutes: 8,
+        contentMarkdown: '# Overview\n\nSpecial walkthrough mentioning Observation Deck.',
+        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      ),
+    ];
+
+    // 1. Match by title ("Lester")
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Lester'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lester Assassinations'), findsOneWidget);
+
+    // 2. Match by category ("Money")
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Money'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lester Assassinations'), findsOneWidget);
+
+    // 3. Match by tag ("BAWSAQ")
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'BAWSAQ'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lester Assassinations'), findsOneWidget);
+
+    // 4. Match by contentMarkdown ("Observation Deck")
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Observation Deck'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lester Assassinations'), findsOneWidget);
+  });
+
+  testWidgets('Tapping guide result navigates to /guides', (WidgetTester tester) async {
+    const mockGuides = [
+      GuideArticle(
+        id: 'guide_lester',
+        title: 'Lester Assassinations & Stock Market',
+        category: 'Money & Stock Market',
+        tags: ['Money', 'Stock'],
+        difficulty: 'Intermediate',
+        readTimeMinutes: 8,
+        contentMarkdown: '# Stock Market Strategy',
+        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      ),
+    ];
+
+    final container = ProviderContainer(
+      overrides: [
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
+        mapPoiProvider.overrideWith((ref) => Future.value([])),
+        guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+      ],
+    );
+
+    final router = GoRouter(
+      initialLocation: '/search',
+      routes: [
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(query: 'Lester'),
+        ),
+        GoRoute(
+          path: '/guides',
+          builder: (context, state) => const Scaffold(body: Text('Guides View')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap on guide item
+    await tester.tap(find.text('Lester Assassinations & Stock Market'));
+    await tester.pumpAndSettle();
+
+    // Ensure we navigated to /guides
+    expect(find.text('Guides View'), findsOneWidget);
+  });
+
+  testWidgets('SearchScreen renders guide badges (category, difficulty, read time, video indicator)', (WidgetTester tester) async {
+    const mockGuides = [
+      GuideArticle(
+        id: 'guide_lester',
+        title: 'Lester Assassinations & Stock Market',
+        category: 'Money & Stock Market',
+        tags: ['Money'],
+        difficulty: 'Intermediate',
+        readTimeMinutes: 8,
+        contentMarkdown: '# Stock Strategy\n\nHigh payout guide.',
+        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value([])),
+          guidesProvider.overrideWith((ref) => Future.value(mockGuides)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Lester'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Category badge
+    expect(find.text('Money & Stock Market'), findsOneWidget);
+
+    // Difficulty badge
+    expect(find.text('Intermediate'), findsOneWidget);
+
+    // Read time text
+    expect(find.text('8 min'), findsOneWidget);
+
+    // Video indicator icon on guide leading
+    expect(find.byIcon(Icons.videocam), findsOneWidget);
+
+    // Book icon on guide leading
+    expect(find.byIcon(Icons.menu_book), findsOneWidget);
+
+    // Trailing chevron
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+  });
 }
+
 

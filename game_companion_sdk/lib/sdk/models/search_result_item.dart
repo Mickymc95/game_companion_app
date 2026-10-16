@@ -1,6 +1,7 @@
 enum SearchResultType {
   mapPoi,
   wikiItem,
+  guideArticle,
 }
 
 class SearchResultItem {
