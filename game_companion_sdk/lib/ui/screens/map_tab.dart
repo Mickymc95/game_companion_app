@@ -11,6 +11,7 @@ import '../../sdk/storage/collection_tracker.dart';
 import '../providers/map_providers.dart';
 import '../providers/wiki_providers.dart';
 import '../../sdk/map/target_map_position_provider.dart';
+import '../utils/poi_style_helper.dart';
 
 class MapTab extends ConsumerStatefulWidget {
   const MapTab({super.key});
@@ -21,7 +22,6 @@ class MapTab extends ConsumerStatefulWidget {
 
 class _MapTabState extends ConsumerState<MapTab> {
   final MapController _mapController = MapController();
-
 
   @override
   void initState() {
@@ -37,8 +37,7 @@ class _MapTabState extends ConsumerState<MapTab> {
 
   @override
   Widget build(BuildContext context) {
-
-        ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
+    ref.listen<TargetMapPosition?>(targetMapPositionProvider, (previous, next) {
       if (next != null) {
         _mapController.move(next.position, next.zoom);
 
@@ -60,36 +59,24 @@ class _MapTabState extends ConsumerState<MapTab> {
       body: poiAsyncValue.when(
         data: (pois) {
           final filteredPois = pois.where((poi) {
-            if (!filterState.contains(poi.category)) return false;
-            if (hideCollected && collectedState.contains(poi.id)) return false;
-            return true;
+            final isCollected = collectedState.contains(poi.id);
+            return filterState.isSubcategoryEnabled(poi.subCategory) &&
+                (!hideCollected || !isCollected);
           }).toList();
 
           final markers = filteredPois.map((poi) {
             final isCollected = collectedState.contains(poi.id);
             final isHighlighted = highlightedPoi?.id == poi.id;
+            final style = getPoiStyle(poi);
 
-            Color iconColor;
-            IconData iconData;
-
-            if (poi.category == 'collectibles') {
-              iconColor = Colors.greenAccent;
-              iconData = Icons.rocket_launch;
-            } else if (poi.category == 'stunts') {
-              iconColor = Colors.deepOrange;
-              iconData = Icons.sports_motorsports;
-            } else if (poi.category == 'services') {
-              iconColor = Colors.redAccent;
-              iconData = Icons.shield;
-            } else {
-              iconColor = Colors.blueAccent;
-              iconData = Icons.location_on;
-            }
+            final markerColor = isHighlighted ? Colors.amber : style.color;
+            final markerIcon = isHighlighted ? Icons.my_location : style.icon;
+            final markerSize = isHighlighted ? 48.0 : 40.0;
 
             return Marker(
               point: inGameToMapCoords(poi.gameX, poi.gameY),
-              width: isHighlighted ? 48 : 40,
-              height: isHighlighted ? 48 : 40,
+              width: markerSize,
+              height: markerSize,
               child: GestureDetector(
                 onTap: () {
                   _showPoiDetails(context, ref, poi);
@@ -101,7 +88,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: isHighlighted ? Colors.amber : iconColor,
+                          color: markerColor,
                           shape: BoxShape.circle,
                           boxShadow: isHighlighted
                               ? [
@@ -118,7 +105,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                         ),
                         child: Center(
                           child: Icon(
-                            isHighlighted ? Icons.my_location : iconData,
+                            markerIcon,
                             color: Colors.white,
                             size: isHighlighted ? 24 : 22,
                           ),
@@ -130,6 +117,7 @@ class _MapTabState extends ConsumerState<MapTab> {
                             color: Colors.green,
                             shape: BoxShape.circle,
                           ),
+                          padding: const EdgeInsets.all(2),
                           child: const Icon(
                             Icons.check,
                             size: 14,
@@ -176,7 +164,8 @@ class _MapTabState extends ConsumerState<MapTab> {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                            onPressed: () => _showCompletionSummarySheet(context, ref, completionSummary),
+                            onPressed: () => _showCompletionSummarySheet(
+                                context, ref, completionSummary),
                           ),
                           const SizedBox(width: 8),
 
@@ -195,14 +184,22 @@ class _MapTabState extends ConsumerState<MapTab> {
                           const SizedBox(width: 8),
 
                           _buildFilterChip(
-                              ref, filterState, 'All', ['collectibles', 'stunts', 'services']),
+                              ref,
+                              filterState,
+                              'All',
+                              const ['collectibles', 'stunts', 'services', 'secrets_world']),
                           const SizedBox(width: 8),
                           _buildFilterChip(
-                              ref, filterState, 'Collectibles', ['collectibles']),
+                              ref, filterState, 'Collectibles', const ['collectibles']),
                           const SizedBox(width: 8),
-                          _buildFilterChip(ref, filterState, 'Stunts', ['stunts']),
+                          _buildFilterChip(
+                              ref, filterState, 'Stunts', const ['stunts']),
                           const SizedBox(width: 8),
-                          _buildFilterChip(ref, filterState, 'Services', ['services']),
+                          _buildFilterChip(
+                              ref, filterState, 'Services', const ['services']),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                              ref, filterState, 'Secrets & World', const ['secrets_world']),
                         ],
                       ),
                     ),
@@ -240,25 +237,27 @@ class _MapTabState extends ConsumerState<MapTab> {
   }
 
   Widget _buildFilterChip(
-      WidgetRef ref, Set<String> filterState, String label, List<String> categories) {
-    final isSelected = categories.every((cat) => filterState.contains(cat));
+      WidgetRef ref, MapFilterState filterState, String label, List<String> categories) {
+    final notifier = ref.read(mapFilterProvider.notifier);
+    final bool isSelected;
+    if (label == 'All') {
+      isSelected = categories.every((cat) => filterState.isCategoryFullyEnabled(cat));
+    } else {
+      isSelected = filterState.isCategoryFullyEnabled(categories.first);
+    }
+
     return FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (bool selected) {
-        final notifier = ref.read(mapFilterProvider.notifier);
         if (label == 'All') {
           if (selected) {
-            for (var cat in categories) {
-              if (!filterState.contains(cat)) notifier.toggleCategory(cat);
-            }
+            notifier.enableAll();
           } else {
-            for (var cat in categories) {
-              if (filterState.contains(cat)) notifier.toggleCategory(cat);
-            }
+            notifier.disableAll();
           }
         } else {
-          notifier.toggleCategory(categories.first);
+          notifier.toggleCategoryGroup(categories.first);
         }
       },
     );
@@ -282,10 +281,17 @@ class _MapTabState extends ConsumerState<MapTab> {
                   ...MapLayerType.values.map((layer) {
                     final isSelected = layer == activeLayer;
                     return ListTile(
-                      leading: Icon(layer.icon, color: isSelected ? Theme.of(context).colorScheme.primary : null),
-                      title: Text(layer.displayName, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                      trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      leading: Icon(layer.icon,
+                          color: isSelected ? Theme.of(context).colorScheme.primary : null),
+                      title: Text(layer.displayName,
+                          style: TextStyle(
+                              fontWeight:
+                                  isSelected ? FontWeight.bold : FontWeight.normal)),
+                      trailing: isSelected
+                          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                          : null,
+                      shape:
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       selected: isSelected,
                       onTap: () {
                         ref.read(activeMapLayerProvider.notifier).state = layer;
@@ -302,80 +308,116 @@ class _MapTabState extends ConsumerState<MapTab> {
     );
   }
 
-  void _showCompletionSummarySheet(BuildContext context, WidgetRef ref, MapCompletionSummary summary) {
+  void _showCompletionSummarySheet(
+      BuildContext context, WidgetRef ref, MapCompletionSummary summary) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, child) {
             final hideCollected = ref.watch(hideCollectedPinsProvider);
 
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Progress & Checklist', style: Theme.of(context).textTheme.titleLarge),
-                      Text(
-                        '${(summary.percentage * 100).toInt()}%',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              maxChildSize: 0.9,
+              minChildSize: 0.4,
+              expand: false,
+              builder: (context, scrollController) {
+                return ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Progress & Checklist',
+                            style: Theme.of(context).textTheme.titleLarge),
+                        Text(
+                          '${(summary.percentage * 100).toInt()}%',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    LinearProgressIndicator(
+                      value: summary.percentage,
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${summary.collectedCount} of ${summary.totalCount} items collected',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const Divider(height: 32),
+                    ...summary.categoryStats.map((cat) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(cat.displayName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                    '${cat.collectedCount}/${cat.totalCount} (${(cat.percentage * 100).toInt()}%)'),
+                              ],
                             ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  LinearProgressIndicator(
-                    value: summary.percentage,
-                    minHeight: 10,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${summary.collectedCount} of ${summary.totalCount} items collected',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const Divider(height: 32),
-                  ...summary.categoryStats.map((cat) {
-                    final label = cat.category[0].toUpperCase() + cat.category.substring(1);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              Text('${cat.collectedCount}/${cat.totalCount} (${(cat.percentage * 100).toInt()}%)'),
+                            const SizedBox(height: 4),
+                            LinearProgressIndicator(
+                              value: cat.percentage,
+                              minHeight: 6,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            if (cat.subcategoryStats.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              ...cat.subcategoryStats.map((subcat) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 3, horizontal: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        subcat.displayName,
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                      Text(
+                                        subcat.isCollectable
+                                            ? '${subcat.collectedCount}/${subcat.totalCount} (${subcat.remainingCount} left)'
+                                            : '${subcat.totalCount} POIs',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          LinearProgressIndicator(
-                            value: cat.percentage,
-                            minHeight: 6,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    title: const Text('Hide Collected Pins from Map'),
-                    value: hideCollected,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (val) {
-                      ref.read(hideCollectedPinsProvider.notifier).state = val;
-                    },
-                  ),
-                ],
-              ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      title: const Text('Hide Collected Pins from Map'),
+                      value: hideCollected,
+                      contentPadding: EdgeInsets.zero,
+                      onChanged: (val) {
+                        ref.read(hideCollectedPinsProvider.notifier).state = val;
+                      },
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -383,48 +425,307 @@ class _MapTabState extends ConsumerState<MapTab> {
     );
   }
 
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'collectibles':
+        return Icons.rocket_launch;
+      case 'stunts':
+        return Icons.sports_motorsports;
+      case 'services':
+        return Icons.apartment;
+      case 'secrets_world':
+        return Icons.auto_awesome;
+      default:
+        return Icons.category;
+    }
+  }
+
   void _showFilterSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, child) {
             final filterState = ref.watch(mapFilterProvider);
-            final categories = ['collectibles', 'stunts', 'services'];
+            final filterNotifier = ref.read(mapFilterProvider.notifier);
+            final hideCollected = ref.watch(hideCollectedPinsProvider);
+            final completionSummary = ref.watch(mapCompletionSummaryProvider);
 
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Filter Map Categories',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    children: categories.map((cat) {
-                      return FilterChip(
-                        label: Text(cat),
-                        selected: filterState.contains(cat),
-                        onSelected: (bool value) {
-                          ref
-                              .read(mapFilterProvider.notifier)
-                              .toggleCategory(cat);
+            const canonicalGroups = [
+              'collectibles',
+              'stunts',
+              'services',
+              'secrets_world',
+            ];
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.85,
+              maxChildSize: 0.95,
+              minChildSize: 0.5,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      // Header with Title and Close
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Map Filters & Progress',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Quick Actions: Select All, Clear All
+                      Row(
+                        children: [
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.select_all, size: 16),
+                            label: const Text('Select All'),
+                            onPressed: () {
+                              filterNotifier.enableAll();
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.deselect, size: 16),
+                            label: const Text('Clear All'),
+                            onPressed: () {
+                              filterNotifier.disableAll();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Global Hide Collected Switch
+                      SwitchListTile(
+                        title: const Text('Hide Collected Pins'),
+                        subtitle: const Text('Dim or hide completed collectibles'),
+                        value: hideCollected,
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (val) {
+                          ref.read(hideCollectedPinsProvider.notifier).state = val;
                         },
-                      );
-                    }).toList(),
+                      ),
+                      const Divider(height: 20),
+
+                      // Collapsible accordion groups (ExpansionTile) for the 4 main categories
+                      ...canonicalGroups.map((catKey) {
+                        final catStats = completionSummary.categoryStats.firstWhere(
+                          (c) => c.category == catKey,
+                          orElse: () => CategoryCompletionStats(
+                            category: catKey,
+                            displayName: getCategoryDisplayName(catKey),
+                            totalCount: 0,
+                            collectedCount: 0,
+                            subcategoryStats: [],
+                          ),
+                        );
+
+                        final isFullyEnabled = filterState.isCategoryFullyEnabled(catKey);
+                        final isPartiallyEnabled = filterState.isCategoryPartiallyEnabled(catKey);
+
+                        // Use existing subcategory stats if available, or fallback to schema definitions
+                        final subcategories = catStats.subcategoryStats.isNotEmpty
+                            ? catStats.subcategoryStats
+                            : MapFilterState.getSubcategoriesForCategory(catKey).map((subKey) {
+                                return SubcategoryCompletionStats(
+                                  subCategory: subKey,
+                                  displayName: getSubcategoryDisplayName(subKey),
+                                  totalCount: 0,
+                                  collectedCount: 0,
+                                  isCollectable: true,
+                                );
+                              }).toList();
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: ExpansionTile(
+                            key: PageStorageKey<String>('group_$catKey'),
+                            initiallyExpanded: true,
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _getCategoryIcon(catKey),
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 22,
+                              ),
+                            ),
+                            title: Text(
+                              catStats.displayName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        catStats.totalCount > 0
+                                            ? '${catStats.collectedCount}/${catStats.totalCount} completed'
+                                            : '${subcategories.length} subcategories',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                      if (catStats.totalCount > 0)
+                                        Text(
+                                          '${(catStats.percentage * 100).toInt()}%',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  LinearProgressIndicator(
+                                    value: catStats.percentage,
+                                    minHeight: 4,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            trailing: Tooltip(
+                              message: isFullyEnabled
+                                  ? 'Disable all in ${catStats.displayName}'
+                                  : 'Enable all in ${catStats.displayName}',
+                              child: Switch(
+                                value: isFullyEnabled || isPartiallyEnabled,
+                                onChanged: (val) {
+                                  filterNotifier.toggleCategoryGroup(catKey);
+                                },
+                              ),
+                            ),
+                            children: subcategories.map((subcat) {
+                              final style = getPoiStyleForSubcategory(subcat.subCategory);
+                              final isEnabled =
+                                  filterState.isSubcategoryEnabled(subcat.subCategory);
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(
+                                      color: Theme.of(context)
+                                          .dividerColor
+                                          .withValues(alpha: 0.15),
+                                    ),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: style.color.withValues(alpha: 0.15),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(style.icon,
+                                              color: style.color, size: 18),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                subcat.displayName,
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 14),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                subcat.isCollectable
+                                                    ? '${subcat.collectedCount}/${subcat.totalCount} collected (${subcat.remainingCount} left)'
+                                                    : '${subcat.totalCount} locations available',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Switch(
+                                          value: isEnabled,
+                                          onChanged: (val) {
+                                            filterNotifier
+                                                .toggleSubcategory(subcat.subCategory);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    if (subcat.isCollectable && subcat.totalCount > 0) ...[
+                                      const SizedBox(height: 6),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(2),
+                                        child: LinearProgressIndicator(
+                                          value: subcat.percentage,
+                                          minHeight: 4,
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                              style.color),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      }),
+
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Done'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Apply'),
-                    ),
-                  )
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -435,6 +736,7 @@ class _MapTabState extends ConsumerState<MapTab> {
   void _showPoiDetails(BuildContext context, WidgetRef ref, MapPointOfInterest poi) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, child) {
@@ -446,42 +748,132 @@ class _MapTabState extends ConsumerState<MapTab> {
             final allWikiItems = wikiItemsAsync.valueOrNull ?? [];
 
             final matchingWiki = allWikiItems.cast<WikiItem?>().firstWhere(
-              (wiki) => wiki != null && (
-                wiki.title.trim().toLowerCase() == poi.name.trim().toLowerCase() ||
-                wiki.id.trim().toLowerCase() == poi.id.trim().toLowerCase()
-              ),
+              (wiki) =>
+                  wiki != null &&
+                  (wiki.title.trim().toLowerCase() == poi.name.trim().toLowerCase() ||
+                      wiki.id.trim().toLowerCase() == poi.id.trim().toLowerCase()),
               orElse: () => null,
             );
 
-            return Container(
+            return SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(poi.name,
-                      style: Theme.of(context).textTheme.headlineSmall),
-                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: getPoiStyle(poi).color.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          getPoiStyle(poi).icon,
+                          color: getPoiStyle(poi).color,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(poi.name,
+                                style: Theme.of(context).textTheme.headlineSmall),
+                            Text(
+                              '${getCategoryDisplayName(poi.category)} • ${getSubcategoryDisplayName(poi.subCategory)}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text('Coordinates: ${poi.gameX}, ${poi.gameY}',
                       style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(poi.description),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      icon: Icon(isCollected ? Icons.undo : Icons.check),
-                      label: Text(isCollected
-                          ? 'Mark as Uncollected'
-                          : 'Mark as Collected'),
-                      onPressed: () {
-                        ref
-                            .read(collectionTrackerProvider.notifier)
-                            .toggleCollection(poi.id);
-                        Navigator.pop(ctx);
-                      },
+
+                  // Stunt Jump Specifications: Prominently displayed
+                  if (poi.subCategory == 'stunt_jumps' ||
+                      poi.takeoffDirection != null ||
+                      poi.landingZone != null ||
+                      poi.vehicleRecommendation != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: Colors.deepOrange.withValues(alpha: 0.4)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.sports_motorsports,
+                                  color: Colors.deepOrange, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Stunt Jump Specifications',
+                                style:
+                                    Theme.of(context).textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.deepOrange,
+                                        ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          if (poi.takeoffDirection != null &&
+                              poi.takeoffDirection!.isNotEmpty)
+                            _buildSpecRow(context, Icons.north_east,
+                                'Takeoff Direction', poi.takeoffDirection!),
+                          if (poi.landingZone != null && poi.landingZone!.isNotEmpty)
+                            _buildSpecRow(context, Icons.flag_outlined,
+                                'Landing Zone', poi.landingZone!),
+                          if (poi.vehicleRecommendation != null &&
+                              poi.vehicleRecommendation!.isNotEmpty)
+                            _buildSpecRow(
+                                context,
+                                Icons.directions_car_outlined,
+                                'Recommended Vehicle',
+                                poi.vehicleRecommendation!),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
+
+                  const SizedBox(height: 24),
+                  if (poi.isCollectable)
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        icon: Icon(isCollected ? Icons.undo : Icons.check),
+                        label: Text(isCollected
+                            ? 'Mark as Uncollected'
+                            : 'Mark as Collected'),
+                        onPressed: () {
+                          ref
+                              .read(collectionTrackerProvider.notifier)
+                              .toggleCollection(poi.id);
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                    ),
+
                   // Route Sequencer: Find Next Closest Uncollected POI
                   if (poi.isCollectable) ...[
                     const SizedBox(height: 8),
@@ -496,11 +888,18 @@ class _MapTabState extends ConsumerState<MapTab> {
 
                           // Prefer uncollected POIs in the same category first
                           final sameCategory = allPois.where(
-                            (p) => p.isCollectable && !collected.contains(p.id) && p.id != poi.id && p.category == poi.category,
+                            (p) =>
+                                p.isCollectable &&
+                                !collected.contains(p.id) &&
+                                p.id != poi.id &&
+                                p.category == poi.category,
                           );
                           final candidates = sameCategory.isNotEmpty
                               ? sameCategory
-                              : allPois.where((p) => p.isCollectable && !collected.contains(p.id) && p.id != poi.id);
+                              : allPois.where((p) =>
+                                  p.isCollectable &&
+                                  !collected.contains(p.id) &&
+                                  p.id != poi.id);
 
                           final nearest = findNearestPoi(poi, candidates);
                           Navigator.pop(ctx);
@@ -513,22 +912,27 @@ class _MapTabState extends ConsumerState<MapTab> {
                               nearest.gameY,
                             );
                             ref.read(highlightedPoiProvider.notifier).state = nearest;
-                            final target = inGameToMapCoords(nearest.gameX, nearest.gameY);
+                            final target =
+                                inGameToMapCoords(nearest.gameX, nearest.gameY);
                             _mapController.move(target, 4.5);
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Targeted closest ${nearest.name} (~${dist.toInt()}m away)'),
+                                content: Text(
+                                    'Targeted closest ${nearest.name} (~${dist.toInt()}m away)'),
                                 duration: const Duration(seconds: 4),
                                 action: SnackBarAction(
                                   label: 'View',
-                                  onPressed: () => _showPoiDetails(context, ref, nearest),
+                                  onPressed: () =>
+                                      _showPoiDetails(context, ref, nearest),
                                 ),
                               ),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('All collectables in this category are completed!')),
+                              const SnackBar(
+                                  content: Text(
+                                      'All collectables in this category are completed!')),
                             );
                           }
                         },
@@ -555,6 +959,34 @@ class _MapTabState extends ConsumerState<MapTab> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildSpecRow(
+      BuildContext context, IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall,
+                children: [
+                  TextSpan(
+                    text: '$label: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

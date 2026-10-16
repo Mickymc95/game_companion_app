@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'ui/theme/app_theme.dart';
@@ -14,6 +15,15 @@ import 'sdk/models/wiki_item.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFF141218),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
   final prefs = await SharedPreferences.getInstance();
 
   runApp(
@@ -91,7 +101,7 @@ class GameCompanionApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Game Companion',
+      title: 'Games Companion',
       theme: appTheme,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
