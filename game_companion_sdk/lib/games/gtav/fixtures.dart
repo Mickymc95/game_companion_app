@@ -85,7 +85,7 @@ Maximizing your wealth in Grand Theft Auto V requires careful timing of Lester C
 - **The Bus Assassination**: Complete the mission first, then invest in Vapid (VAP) on BAWSAQ after its stock tanks. Sell when it rebounds at ~100% profit.
 - **The Construction Assassination**: Invest in GoldCoast (GCD) on LCN prior to starting. Sell at ~80% profit.
 ''',
-      videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
     ),
   ];
 }

@@ -314,7 +314,7 @@ void main() {
         difficulty: 'Intermediate',
         readTimeMinutes: 8,
         contentMarkdown: '# Stock Market\n\nInvest in Betta Pharmaceuticals.',
-        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+        videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
       ),
     ];
 
@@ -349,7 +349,7 @@ void main() {
         difficulty: 'Intermediate',
         readTimeMinutes: 8,
         contentMarkdown: '# Overview\n\nSpecial walkthrough mentioning Observation Deck.',
-        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+        videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
       ),
     ];
 
@@ -428,7 +428,7 @@ void main() {
         difficulty: 'Intermediate',
         readTimeMinutes: 8,
         contentMarkdown: '# Stock Market Strategy',
-        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+        videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
       ),
     ];
 
@@ -483,7 +483,7 @@ void main() {
         difficulty: 'Intermediate',
         readTimeMinutes: 8,
         contentMarkdown: '# Stock Strategy\n\nHigh payout guide.',
-        videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+        videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
       ),
     ];
 

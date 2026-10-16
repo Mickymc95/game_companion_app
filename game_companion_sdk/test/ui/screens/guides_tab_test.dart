@@ -18,7 +18,7 @@ void main() {
       difficulty: 'Intermediate',
       readTimeMinutes: 8,
       contentMarkdown: '# Lester Stock Market Strategy\n\nMaximizing cash reserves in GTA V Story Mode.\n\n## Key Rules\n- Rule 1: Complete Big Score first\n- Rule 2: Invest 100% of all 3 characters',
-      videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+      videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
     ),
     GuideArticle(
       id: 'guide_stunts_50',
@@ -28,7 +28,7 @@ void main() {
       difficulty: 'Advanced',
       readTimeMinutes: 6,
       contentMarkdown: '# 50 Stunt Jumps Masterclass\n\nCinematic camera landing physics.\n\n## Steps\n1. Level the vehicle\n2. Touch down clean',
-      videoUrl: 'https://www.youtube.com/watch?v=1b5P6w7cW5U',
+      videoUrl: 'https://www.youtube.com/watch?v=Q2PvG58TtzM',
     ),
     GuideArticle(
       id: 'guide_secrets_supercars',
@@ -168,7 +168,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: YoutubeThumbnailCard(
-            videoUrl: 'https://www.youtube.com/watch?v=hG7W5v6J7Z0',
+            videoUrl: 'https://www.youtube.com/watch?v=MCkgSWeqmPM',
             thumbnailUrl: '', // Trigger offline fallback view
             title: 'Test Lester Video',
           ),
