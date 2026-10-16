@@ -945,4 +945,83 @@ void main() {
     expect(find.text('Cinema Doppler'), findsOneWidget);
     expect(find.byIcon(Icons.my_location), findsNothing);
   });
+
+  testWidgets('Find Next Closest displays floating SnackBar and tapping View successfully opens nearest POI details', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    final testPois = [
+      MapPointOfInterest(
+        id: 'sub_piece_1',
+        name: 'Submarine Piece #01',
+        category: 'collectibles',
+        subCategory: 'submarine_pieces',
+        gameX: -100.0,
+        gameY: 200.0,
+        description: 'First piece in Paleto Bay',
+        isCollectable: true,
+      ),
+      MapPointOfInterest(
+        id: 'sub_piece_2',
+        name: 'Submarine Piece #02 - Paleto Cove',
+        category: 'collectibles',
+        subCategory: 'submarine_pieces',
+        gameX: -150.0,
+        gameY: 250.0,
+        description: 'Paleto Cove Propeller Assembly',
+        isCollectable: true,
+      ),
+    ];
+
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        poiProvider.overrideWith((ref) => Future.value(testPois)),
+        mapPoiProvider.overrideWith((ref) => Future.value(testPois)),
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(body: MapTab()),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // Tap first marker to open its info card
+    await tester.tap(find.byKey(const Key('map_marker_sub_piece_1')));
+    await tester.pumpAndSettle();
+
+    // First POI details sheet is open
+    expect(find.text('Submarine Piece #01'), findsOneWidget);
+    expect(find.text('Find Next Closest'), findsOneWidget);
+
+    // Tap 'Find Next Closest'
+    await tester.tap(find.text('Find Next Closest'));
+    await tester.pumpAndSettle();
+
+    // The first bottom sheet should now be closed
+    expect(find.text('First piece in Paleto Bay'), findsNothing);
+
+    // Floating SnackBar must be displayed with 'View' action
+    expect(find.text('Submarine Piece #02 - Paleto Cove'), findsOneWidget);
+    expect(find.text('View'), findsOneWidget);
+    final snackBarFinder = find.byType(SnackBar);
+    expect(snackBarFinder, findsOneWidget);
+    final snackBar = tester.widget<SnackBar>(snackBarFinder);
+    expect(snackBar.behavior, SnackBarBehavior.floating);
+
+    // Tap 'View' on the SnackBar
+    await tester.tap(find.text('View'));
+    await tester.pumpAndSettle();
+
+    // The nearest POI details sheet must now be open!
+    expect(find.text('Submarine Piece #02 - Paleto Cove'), findsOneWidget);
+    expect(find.text('Paleto Cove Propeller Assembly'), findsOneWidget);
+  });
 }

@@ -887,8 +887,11 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
   }
 
   void _showPoiDetails(BuildContext context, WidgetRef ref, MapPointOfInterest poi) {
+    final hostContext = mounted ? this.context : context;
+    final hostRef = this.ref;
+
     showModalBottomSheet(
-      context: context,
+      context: hostContext,
       isScrollControlled: true,
       builder: (ctx) {
         return Consumer(
@@ -1069,25 +1072,98 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
                                 inGameToMapCoords(nearest.gameX, nearest.gameY);
                             _mapController.move(target, 4.5);
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            final messenger = ScaffoldMessenger.of(hostContext);
+                            messenger.hideCurrentSnackBar();
+                            messenger.showSnackBar(
                               SnackBar(
-                                content: Text(
-                                    'Targeted closest ${nearest.name} (~${dist.toInt()}m away)'),
+                                behavior: SnackBarBehavior.floating,
+                                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                backgroundColor: const Color(0xFF2A2831),
+                                content: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: getPoiStyle(nearest).color.withValues(alpha: 0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        getPoiStyle(nearest).icon,
+                                        color: getPoiStyle(nearest).color,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            nearest.name,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Targeted closest (~${dist.toInt()}m away)',
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(alpha: 0.8),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 duration: const Duration(seconds: 4),
                                 action: SnackBarAction(
                                   label: 'View',
+                                  textColor: const Color(0xFFD0BCFF),
                                   onPressed: () {
                                     _cancelShake();
-                                    _showPoiDetails(context, ref, nearest);
+                                    messenger.hideCurrentSnackBar();
+                                    if (mounted) {
+                                      _mapController.move(target, 4.5);
+                                      _showPoiDetails(hostContext, hostRef, nearest);
+                                    }
                                   },
                                 ),
                               ),
                             );
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'All collectables in this category are completed!')),
+                            final messenger = ScaffoldMessenger.of(hostContext);
+                            messenger.hideCurrentSnackBar();
+                            messenger.showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                backgroundColor: const Color(0xFF2A2831),
+                                content: const Row(
+                                  children: [
+                                    Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'All collectables in this category are completed!',
+                                        style: TextStyle(color: Colors.white, fontSize: 13),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                duration: const Duration(seconds: 3),
+                              ),
                             );
                           }
                         },
@@ -1103,7 +1179,7 @@ class _MapTabState extends ConsumerState<MapTab> with SingleTickerProviderStateM
                         label: const Text('Wiki / Lore'),
                         onPressed: () {
                           Navigator.pop(ctx);
-                          context.push('/wiki/detail', extra: matchingWiki);
+                          hostContext.push('/wiki/detail', extra: matchingWiki);
                         },
                       ),
                     ),
