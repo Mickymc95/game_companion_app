@@ -20,11 +20,41 @@ class GameSwitcherDrawer extends ConsumerWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
             ),
-            child: Text(
-              'Select Game',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/icons/app_icon.png',
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Games Companion',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Select Game',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           ...games.map((game) {
