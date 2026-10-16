@@ -8,6 +8,9 @@ class MapPointOfInterest {
   final String description;
   final String? imageUrl;
   final bool isCollectable;
+  final String? takeoffDirection;
+  final String? landingZone;
+  final String? vehicleRecommendation;
 
   MapPointOfInterest({
     required this.id,
@@ -19,6 +22,9 @@ class MapPointOfInterest {
     required this.description,
     this.imageUrl,
     this.isCollectable = false,
+    this.takeoffDirection,
+    this.landingZone,
+    this.vehicleRecommendation,
   });
 
   factory MapPointOfInterest.fromJson(Map<String, dynamic> json) {
@@ -32,6 +38,9 @@ class MapPointOfInterest {
       description: json['description'] as String,
       imageUrl: json['imageUrl'] as String?,
       isCollectable: json['isCollectable'] as bool? ?? false,
+      takeoffDirection: (json['takeoffDirection'] ?? json['takeoff_direction']) as String?,
+      landingZone: (json['landingZone'] ?? json['landing_zone']) as String?,
+      vehicleRecommendation: (json['vehicleRecommendation'] ?? json['vehicle_recommendation']) as String?,
     );
   }
 }

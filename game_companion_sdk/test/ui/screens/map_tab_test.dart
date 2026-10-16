@@ -185,4 +185,121 @@ void main() {
     // Now the collected marker is omitted
     expect(find.byIcon(Icons.check), findsNothing);
   });
+
+  testWidgets('MapTab filter sheet displays accordion groups and subcategories', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    final testPois = [
+      MapPointOfInterest(
+        id: 'sp_1',
+        name: 'Spaceship Part 1',
+        category: 'collectibles',
+        subCategory: 'spaceship_parts',
+        gameX: 0,
+        gameY: 0,
+        description: 'desc',
+        isCollectable: true,
+      ),
+      MapPointOfInterest(
+        id: 'sj_1',
+        name: 'Stunt Jump 1',
+        category: 'stunts',
+        subCategory: 'stunt_jumps',
+        gameX: 100,
+        gameY: 100,
+        description: 'desc',
+        isCollectable: true,
+      ),
+    ];
+
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        mapPoiProvider.overrideWith((ref) => Future.value(testPois)),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(body: MapTab()),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Open the Filter Sheet
+    await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pumpAndSettle();
+
+    // Check Sheet Header and Main Accordion Groups
+    expect(find.text('Map Filters & Progress'), findsOneWidget);
+    expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Clear All'), findsOneWidget);
+    expect(find.text('Collectibles'), findsWidgets);
+    expect(find.text('Stunts & Aerial'), findsWidgets);
+    expect(find.text('Services'), findsWidgets);
+    expect(find.text('Secrets & World'), findsWidgets);
+
+    // Tap Done to close
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('MapTab displays Stunt Jump specifications in detail sheet', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    final stuntJump = MapPointOfInterest(
+      id: 'stunt_jump_01',
+      name: 'Del Perro Freeway Jump',
+      category: 'stunts',
+      subCategory: 'stunt_jumps',
+      gameX: -1200.0,
+      gameY: -800.0,
+      description: 'Jump over the barrier onto the freeway',
+      isCollectable: true,
+      takeoffDirection: 'East-Southeast',
+      landingZone: 'Freeway median between lanes',
+      vehicleRecommendation: 'Pegassi Bati 801',
+    );
+
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        mapPoiProvider.overrideWith((ref) => Future.value([stuntJump])),
+        wikiItemsProvider.overrideWith((ref) => Future.value([])),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: Scaffold(body: MapTab()),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Tap on the Stunt Jump marker
+    await tester.tap(find.byIcon(Icons.sports_motorsports));
+    await tester.pumpAndSettle();
+
+    // Verify detail sheet shows stunt jump specifications prominently
+    expect(find.text('Del Perro Freeway Jump'), findsOneWidget);
+    expect(find.text('Stunt Jump Specifications'), findsOneWidget);
+    expect(find.textContaining('East-Southeast'), findsOneWidget);
+    expect(find.textContaining('Freeway median between lanes'), findsOneWidget);
+    expect(find.textContaining('Pegassi Bati 801'), findsOneWidget);
+
+    // Tap Mark as Collected
+    await tester.tap(find.text('Mark as Collected'));
+    await tester.pumpAndSettle();
+
+    // Verify state updated
+    expect(container.read(collectionTrackerProvider).contains('stunt_jump_01'), isTrue);
+  });
 }

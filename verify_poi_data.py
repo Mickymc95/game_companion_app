@@ -1,0 +1,1 @@
+game_companion_sdk/verify_poi_data.py
