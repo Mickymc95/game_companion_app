@@ -7,7 +7,9 @@ import '../../sdk/models/map_poi.dart';
 import '../../sdk/models/wiki_item.dart';
 import '../../sdk/map/coords_helper.dart';
 import '../../sdk/map/target_map_position_provider.dart';
+import '../../sdk/storage/collection_tracker.dart';
 import '../utils/wiki_icon_helper.dart';
+import '../utils/poi_style_helper.dart';
 import '../widgets/wiki_item_thumbnail.dart';
 
 class SearchScreen extends ConsumerWidget {
@@ -15,9 +17,64 @@ class SearchScreen extends ConsumerWidget {
 
   const SearchScreen({super.key, required this.query});
 
+  Widget _buildMapPoiLeading(MapPointOfInterest poi, bool isCollected) {
+    final style = getPoiStyle(poi);
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: style.color.withValues(alpha: 0.18),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: style.color.withValues(alpha: 0.7),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: style.color.withValues(alpha: 0.25),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(
+              style.icon,
+              color: style.color,
+              size: 22,
+            ),
+          ),
+        ),
+        if (isCollected)
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(2),
+            child: const Icon(
+              Icons.check,
+              size: 12,
+              color: Colors.white,
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchResultsAsync = ref.watch(unifiedSearchResultsProvider(query));
+
+    Set<String> collectedIds = const {};
+    try {
+      collectedIds = ref.watch(collectionTrackerProvider);
+    } catch (_) {
+      // Graceful fallback if SharedPreferences is not registered in testing harness
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,19 +106,77 @@ class SearchScreen extends ConsumerWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final item = mapResults[index];
+                      final poi = item.payload is MapPointOfInterest
+                          ? item.payload as MapPointOfInterest
+                          : null;
+                      final isCollected = poi != null &&
+                          poi.isCollectable &&
+                          collectedIds.contains(poi.id);
+                      final style = poi != null ? getPoiStyle(poi) : null;
+
                       return ListTile(
-                        leading: const Icon(Icons.location_on),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: poi != null
+                            ? _buildMapPoiLeading(poi, isCollected)
+                            : const Icon(Icons.location_on),
                         title: Text(item.title),
-                        subtitle: Text(item.subtitle),
+                        subtitle: style != null
+                            ? Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: style.color.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      style.label,
+                                      style: TextStyle(
+                                        color: style.color,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isCollected) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.check, size: 12, color: Colors.greenAccent),
+                                          SizedBox(width: 2),
+                                          Text(
+                                            'Found',
+                                            style: TextStyle(
+                                              color: Colors.greenAccent,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              )
+                            : Text(item.subtitle),
+                        trailing: const Icon(Icons.chevron_right, size: 20),
                         onTap: () {
-                          final poi = item.payload as MapPointOfInterest;
-                          final coords = inGameToMapCoords(poi.gameX, poi.gameY);
-                          ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
-                            position: coords,
-                            zoom: 4.5,
-                            poiId: poi.id,
-                          );
-                          context.go('/map');
+                          if (poi != null) {
+                            final coords = inGameToMapCoords(poi.gameX, poi.gameY);
+                            ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
+                              position: coords,
+                              zoom: 4.5,
+                              poiId: poi.id,
+                            );
+                            context.go('/map');
+                          }
                         },
                       );
                     },

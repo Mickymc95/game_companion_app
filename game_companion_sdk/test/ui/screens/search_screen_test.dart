@@ -266,4 +266,40 @@ void main() {
     // Generic library_books icon should NOT be used for wiki results
     expect(find.byIcon(Icons.library_books), findsNothing);
   });
+
+  testWidgets('SearchScreen renders map category icon and label badge for map results', (WidgetTester tester) async {
+    final mockPois = [
+      MapPointOfInterest(
+        id: 'stunt_1',
+        name: 'Stunt Jump #1',
+        category: 'stunts',
+        subCategory: 'stunt_jumps',
+        gameX: 100,
+        gameY: 200,
+        description: 'Del Perro Pier ramp',
+        isCollectable: true,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wikiItemsProvider.overrideWith((ref) => Future.value([])),
+          mapPoiProvider.overrideWith((ref) => Future.value(mockPois)),
+        ],
+        child: const MaterialApp(
+          home: SearchScreen(query: 'Stunt'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify sports_motorsports icon is rendered for stunt jumps
+    expect(find.byIcon(Icons.sports_motorsports), findsOneWidget);
+    expect(find.text('Stunt Jump'), findsOneWidget);
+    // Generic location_on icon should NOT be used for styled map results
+    expect(find.byIcon(Icons.location_on), findsNothing);
+  });
 }
+
