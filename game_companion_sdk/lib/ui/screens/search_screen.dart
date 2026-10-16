@@ -10,6 +10,7 @@ import '../../sdk/map/target_map_position_provider.dart';
 import '../../sdk/storage/collection_tracker.dart';
 import '../utils/wiki_icon_helper.dart';
 import '../utils/poi_style_helper.dart';
+import '../../sdk/models/guide_article.dart';
 import '../widgets/wiki_item_thumbnail.dart';
 
 class SearchScreen extends ConsumerWidget {
@@ -65,6 +66,73 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.trim().toLowerCase()) {
+      case 'beginner':
+        return const Color(0xFF4CAF50); // Green
+      case 'intermediate':
+        return const Color(0xFFFFB300); // Amber
+      case 'advanced':
+        return const Color(0xFFFF5252); // Red
+      default:
+        return Colors.blueGrey;
+    }
+  }
+
+  Widget _buildGuideLeading(BuildContext context, GuideArticle? guide) {
+    final accentColor = Theme.of(context).colorScheme.primary;
+    final hasVideo = guide?.videoUrl != null && guide!.videoUrl!.isNotEmpty;
+
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: accentColor.withValues(alpha: 0.18),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: accentColor.withValues(alpha: 0.7),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.25),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(
+              Icons.menu_book,
+              color: accentColor,
+              size: 20,
+            ),
+          ),
+        ),
+        if (hasVideo)
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFE50914),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                width: 1.5,
+              ),
+            ),
+            padding: const EdgeInsets.all(2),
+            child: const Icon(
+              Icons.videocam,
+              size: 11,
+              color: Colors.white,
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchResultsAsync = ref.watch(unifiedSearchResultsProvider(query));
@@ -92,6 +160,7 @@ class SearchScreen extends ConsumerWidget {
 
           final mapResults = results.where((r) => r.type == SearchResultType.mapPoi).toList();
           final wikiResults = results.where((r) => r.type == SearchResultType.wikiItem).toList();
+          final guideResults = results.where((r) => r.type == SearchResultType.guideArticle).toList();
 
           return CustomScrollView(
             slivers: [
@@ -238,7 +307,82 @@ class SearchScreen extends ConsumerWidget {
                     childCount: wikiResults.length,
                   ),
                 ),
-              ]
+              ],
+
+              if (guideResults.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Guides & Tutorials', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = guideResults[index];
+                      final guide = item.payload is GuideArticle ? item.payload as GuideArticle : null;
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: guide != null
+                            ? _buildGuideLeading(context, guide)
+                            : const Icon(Icons.menu_book),
+                        title: Text(item.title),
+                        subtitle: guide != null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Wrap(
+                                  spacing: 6,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        guide.category,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: _getDifficultyColor(guide.difficulty).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        guide.difficulty,
+                                        style: TextStyle(
+                                          color: _getDifficultyColor(guide.difficulty),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${guide.readTimeMinutes} min',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Text(item.subtitle),
+                        trailing: const Icon(Icons.chevron_right, size: 20),
+                        onTap: () {
+                          context.go('/guides');
+                        },
+                      );
+                    },
+                    childCount: guideResults.length,
+                  ),
+                ),
+              ],
             ],
           );
         },

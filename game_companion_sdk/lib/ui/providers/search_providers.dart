@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../sdk/models/guide_article.dart';
 import '../../sdk/models/search_result_item.dart';
+import 'guides_provider.dart';
 import 'map_providers.dart';
 import 'wiki_providers.dart';
 
@@ -33,6 +35,24 @@ final unifiedSearchResultsProvider = FutureProvider.family<List<SearchResultItem
         subtitle: item.category,
         type: SearchResultType.wikiItem,
         payload: item,
+      ));
+    }
+  }
+
+  // Fetch guides
+  final guides = await ref.watch(guidesProvider.future);
+  for (final guide in guides) {
+    final matchesTitle = guide.title.toLowerCase().contains(lowerQuery);
+    final matchesCategory = guide.category.toLowerCase().contains(lowerQuery);
+    final matchesTags = guide.tags.any((t) => t.toLowerCase().contains(lowerQuery));
+    final matchesContent = guide.contentMarkdown.toLowerCase().contains(lowerQuery);
+
+    if (matchesTitle || matchesCategory || matchesTags || matchesContent) {
+      results.add(SearchResultItem(
+        title: guide.title,
+        subtitle: '${guide.category} • ${guide.difficulty} • ${guide.readTimeMinutes} min',
+        type: SearchResultType.guideArticle,
+        payload: guide,
       ));
     }
   }
