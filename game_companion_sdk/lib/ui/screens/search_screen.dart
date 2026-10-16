@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../games/gtav/fixtures.dart';
-import '../providers/wiki_providers.dart';
+import '../providers/search_providers.dart';
+import '../../sdk/models/search_result_item.dart';
 import '../../sdk/map/coords_helper.dart';
 import '../../sdk/map/target_map_position_provider.dart';
 
@@ -13,20 +13,7 @@ class SearchScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lowerQuery = query.toLowerCase();
-
-    // Search POIs
-    final matchedPois = GTAVFixtures.mapMarkers.where(
-      (poi) => poi.name.toLowerCase().contains(lowerQuery) || poi.description.toLowerCase().contains(lowerQuery)
-    ).toList();
-
-    // Search Wiki Items
-    final wikiItemsAsync = ref.watch(wikiItemsProvider);
-    final allWikiItems = wikiItemsAsync.valueOrNull ?? [];
-
-    final matchedWiki = allWikiItems.where(
-      (item) => item.title.toLowerCase().contains(lowerQuery) || item.description.toLowerCase().contains(lowerQuery)
-    ).toList();
+    final searchResultsAsync = ref.watch(unifiedSearchResultsProvider(query));
 
     return Scaffold(
       appBar: AppBar(
@@ -36,69 +23,78 @@ class SearchScreen extends ConsumerWidget {
               : 'Search Results for "$query"',
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          if (matchedPois.isEmpty && matchedWiki.isEmpty)
-            const SliverFillRemaining(
-              child: Center(child: Text('No results found.')),
-            ),
+      body: searchResultsAsync.when(
+        data: (results) {
+          if (results.isEmpty) {
+            return const Center(child: Text('No results found.'));
+          }
 
-          if (matchedPois.isNotEmpty) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('Map Locations', style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final poi = matchedPois[index];
-                  return ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: Text(poi.name),
-                    subtitle: Text(poi.category),
-                    onTap: () {
-                      final coords = inGameToMapCoords(poi.gameX, poi.gameY);
-                      ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
-                        position: coords,
-                        zoom: 4.5,
-                        poiId: poi.id,
+          final mapResults = results.whereType<MapPoiSearchResult>().toList();
+          final wikiResults = results.whereType<WikiSearchResult>().toList();
+
+          return CustomScrollView(
+            slivers: [
+              if (mapResults.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Map Locations', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = mapResults[index];
+                      return ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: Text(item.title),
+                        subtitle: Text(item.subtitle),
+                        onTap: () {
+                          final poi = item.poi;
+                          final coords = inGameToMapCoords(poi.gameX, poi.gameY);
+                          ref.read(targetMapPositionProvider.notifier).state = TargetMapPosition(
+                            position: coords,
+                            zoom: 4.5,
+                            poiId: poi.id,
+                          );
+                          context.go('/map');
+                        },
                       );
-                      context.go('/map');
                     },
-                  );
-                },
-                childCount: matchedPois.length,
-              ),
-            ),
-          ],
+                    childCount: mapResults.length,
+                  ),
+                ),
+              ],
 
-          if (matchedWiki.isNotEmpty) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('Wiki Entries', style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final item = matchedWiki[index];
-                  return ListTile(
-                    leading: const Icon(Icons.library_books),
-                    title: Text(item.title),
-                    subtitle: Text(item.category),
-                    onTap: () {
-                      context.push('/wiki/detail', extra: item);
+              if (wikiResults.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Wiki Entries', style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = wikiResults[index];
+                      return ListTile(
+                        leading: const Icon(Icons.library_books),
+                        title: Text(item.title),
+                        subtitle: Text(item.subtitle),
+                        onTap: () {
+                          context.push('/wiki/detail', extra: item.item);
+                        },
+                      );
                     },
-                  );
-                },
-                childCount: matchedWiki.length,
-              ),
-            ),
-          ]
-        ],
+                    childCount: wikiResults.length,
+                  ),
+                ),
+              ]
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }
