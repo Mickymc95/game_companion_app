@@ -38,7 +38,7 @@
 
   <style>
     body {
-      background-color: #141218;
+      background-color: #0F1117;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -53,38 +53,91 @@
       width: 100vw;
       color: #e0e0e0;
       user-select: none;
+      background: radial-gradient(circle at 50% 45%, #1E2838 0%, #141722 50%, #0A0C10 100%);
     }
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.12);
-      border-top-color: #42a5f5;
+    .icon-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 2.4s ease-in-out infinite;
+    }
+    .icon-glow {
+      position: absolute;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-      margin-bottom: 24px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.28) 0%, rgba(124, 77, 255, 0.22) 50%, transparent 70%);
+      filter: blur(14px);
+      animation: pulseGlow 2.4s ease-in-out infinite;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .loading-icon {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      border-radius: 22px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+      z-index: 2;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(0.97); }
+      50% { transform: translateY(-7px) scale(1.02); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.45; transform: scale(0.95); }
+      50% { opacity: 0.9; transform: scale(1.1); }
     }
     .loading-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 3px;
       margin-bottom: 8px;
       color: #ffffff;
+      text-transform: uppercase;
     }
     .loading-subtitle {
-      font-size: 0.875rem;
-      color: #9e9e9e;
+      font-size: 0.8rem;
+      color: #8E9BAE;
+      letter-spacing: 0.5px;
+      margin-bottom: 32px;
+    }
+    .progress-bar-track {
+      width: 180px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 45%;
+      background: linear-gradient(90deg, #00E5FF, #7C4DFF);
+      border-radius: 6px;
+      position: absolute;
+      animation: indeterminate 1.4s cubic-bezier(0.65, 0.05, 0.36, 1) infinite;
+    }
+    @keyframes indeterminate {
+      0% { left: -45%; width: 45%; }
+      50% { left: 25%; width: 60%; }
+      100% { left: 100%; width: 45%; }
     }
   </style>
 </head>
 <body>
   <div id="loading-container">
-    <div class="loading-spinner"></div>
+    <div class="icon-wrapper">
+      <div class="icon-glow"></div>
+      <img src="icons/Icon-192.png" class="loading-icon" alt="Games Companion Logo" />
+    </div>
     <div class="loading-title">Games Companion</div>
-    <div class="loading-subtitle">Initializing interactive map and engine...</div>
+    <div class="loading-subtitle">Initializing interactive map & engine...</div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill"></div>
+    </div>
   </div>
 
   <script src="flutter_bootstrap.js" async></script>

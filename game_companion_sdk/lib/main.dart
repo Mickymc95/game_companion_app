@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'ui/theme/app_theme.dart';
+import 'ui/screens/splash_screen.dart';
 import 'ui/screens/shell_screen.dart';
 import 'ui/screens/map_tab.dart';
 import 'ui/screens/wiki_tab.dart';
@@ -37,11 +38,15 @@ void main() async {
 }
 
 final _router = GoRouter(
-  initialLocation: '/map',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
       path: '/',
-      redirect: (context, state) => '/map',
+      redirect: (context, state) => '/splash',
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
